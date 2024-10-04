@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model administrador {
+  idadministrador                Int                              @id @default(autoincrement())
+  idnombre                       Int?
+  contrasenia                    String                           @db.VarChar(255)
+  nombres                        nombres?                         @relation(fields: [idnombre], references: [idnombre], onDelete: Cascade, onUpdate: NoAction)
+  historialcambioshechosporadmin historialcambioshechosporadmin[]
+}
+
+model categorias {
+  idcategoria          Int                    @id @default(autoincrement())
+  nombrecategoria      String                 @db.VarChar(100)
+  cursosenlaplataforma cursosenlaplataforma[]
+  preguntas            preguntas[]
+}
+
+model comentarios {
+  idcomentario                                             Int       @id @default(autoincrement())
+  comentario                                               String
+  idusuariodacomentario                                    Int?
+  idusuariorecibecomentario                                Int?
+  usuarios_comentarios_idusuariodacomentarioTousuarios     usuarios? @relation("comentarios_idusuariodacomentarioTousuarios", fields: [idusuariodacomentario], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_comentarios_idusuariorecibecomentarioTousuarios usuarios? @relation("comentarios_idusuariorecibecomentarioTousuarios", fields: [idusuariorecibecomentario], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model conocimientos {
+  idconocimientos Int            @id @default(autoincrement())
+  iduniversidad   Int?
+  idtitulo        Int?
+  idusuariotutor  Int?
+  fechaegreso     DateTime       @db.Date
+  titulos         titulos?       @relation(fields: [idtitulo], references: [idtitulo], onUpdate: NoAction)
+  universidades   universidades? @relation(fields: [iduniversidad], references: [iduniversidad], onUpdate: NoAction)
+  usuarios        usuarios?      @relation(fields: [idusuariotutor], references: [id], onUpdate: NoAction)
+}
+
+model cursosenlaplataforma {
+  idcurso     Int         @id @default(autoincrement())
+  nombrecurso String      @db.VarChar(255)
+  idcategoria Int?
+  imagen      Bytes?
+  descripcion String?
+  categorias  categorias? @relation(fields: [idcategoria], references: [idcategoria], onUpdate: NoAction)
+  tutoria     tutoria[]
+}
+
+model estadopregunta {
+  idestadop Int         @id @default(autoincrement())
+  estado    String?     @db.VarChar(45)
+  preguntas preguntas[]
+}
+
+model experiencia {
+  idexperiencia Int       @id @default(autoincrement())
+  idusuario     Int?
+  idpuesto      Int?
+  empresa       String?   @db.VarChar(45)
+  descripcion   String?
+  puestos       puestos?  @relation(fields: [idpuesto], references: [idpuesto], onUpdate: NoAction)
+  usuarios      usuarios? @relation(fields: [idusuario], references: [id], onUpdate: NoAction)
+}
+
+model historialcambioshechosporadmin {
+  idcambio        Int            @id @default(autoincrement())
+  fecha           DateTime       @db.Timestamp(6)
+  descripcion     String
+  idadministrador Int?
+  administrador   administrador? @relation(fields: [idadministrador], references: [idadministrador], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model historialcontestadas {
+  idhistorial                                             Int        @id @default(autoincrement())
+  idpregunta                                              Int?
+  idusuariotutor                                          Int?
+  idusuariopupilo                                         Int?
+  fechacontestacion                                       DateTime?  @db.Timestamp(6)
+  precioacordado                                          Decimal?   @db.Decimal(10, 2)
+  valoracion                                              Float?     @db.Real
+  preguntas                                               preguntas? @relation(fields: [idpregunta], references: [idpregunta], onUpdate: NoAction)
+  usuarios_historialcontestadas_idusuariopupiloTousuarios usuarios?  @relation("historialcontestadas_idusuariopupiloTousuarios", fields: [idusuariopupilo], references: [id], onUpdate: NoAction)
+  usuarios_historialcontestadas_idusuariotutorTousuarios  usuarios?  @relation("historialcontestadas_idusuariotutorTousuarios", fields: [idusuariotutor], references: [id], onUpdate: NoAction)
+}
+
+model imgpreguta {
+  idimg      Int        @id @default(autoincrement())
+  idpregunta Int?
+  img        Bytes?
+  preguntas  preguntas? @relation(fields: [idpregunta], references: [idpregunta], onUpdate: NoAction)
+}
+
+model informaciongeneralsharkcat {
+  idinformaciongral Int        @id @default(autoincrement())
+  informacionlegal  String?    @db.VarChar(255)
+  redessociales     Int?
+  redsocial         redsocial? @relation(fields: [redessociales], references: [idred], onUpdate: NoAction)
+  sharkcat          sharkcat[]
+}
+
+model metodospago {
+  id         Int       @id @default(autoincrement())
+  metodopago String    @db.VarChar(100)
+  tutoria    tutoria[]
+}
+
+model nombres {
+  idnombre        Int             @id @default(autoincrement())
+  primernombre    String?         @db.VarChar(100)
+  segundonombre   String?         @db.VarChar(100)
+  primerapellido  String?         @db.VarChar(100)
+  segundoapellido String?         @db.VarChar(100)
+  administrador   administrador[]
+  usuarios        usuarios[]
+}
+
+model preguntas {
+  idpregunta           Int                    @id @default(autoincrement())
+  idcategoria          Int?
+  idusuariopupilo      Int?
+  idestadop            Int?
+  titulo               String                 @db.VarChar(255)
+  descripcion          String?
+  fechapublicacion     DateTime?              @db.Timestamp(6)
+  historialcontestadas historialcontestadas[]
+  imgpreguta           imgpreguta[]
+  categorias           categorias?            @relation(fields: [idcategoria], references: [idcategoria], onUpdate: NoAction)
+  estadopregunta       estadopregunta?        @relation(fields: [idestadop], references: [idestadop], onUpdate: NoAction)
+  usuarios             usuarios?              @relation(fields: [idusuariopupilo], references: [id], onUpdate: NoAction)
+  tutoria              tutoria[]
+}
+
+model puestos {
+  idpuesto    Int           @id @default(autoincrement())
+  puesto      String?       @db.VarChar(45)
+  experiencia experiencia[]
+}
+
+model redsocial {
+  idred                      Int                          @id @default(autoincrement())
+  nombre                     String                       @db.VarChar(100)
+  logo                       String?                      @db.VarChar(255)
+  url                        String?                      @db.VarChar(255)
+  informaciongeneralsharkcat informaciongeneralsharkcat[]
+}
+
+model roles {
+  idrol     Int        @id @default(autoincrement())
+  nombrerol String     @db.VarChar(50)
+  usuarios  usuarios[]
+}
+
+model sharkcat {
+  idsc                       Int                         @id @default(autoincrement())
+  nombre                     String                      @db.VarChar(100)
+  idinformaciongral          Int?
+  informaciongeneralsharkcat informaciongeneralsharkcat? @relation(fields: [idinformaciongral], references: [idinformaciongral], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model titulos {
+  idtitulo      Int             @id @default(autoincrement())
+  nombre        String          @db.VarChar(255)
+  conocimientos conocimientos[]
+}
+
+model tutoria {
+  idtutoria                           Int                   @id @default(autoincrement())
+  idtutor                             Int?
+  idpupilo                            Int?
+  curso                               Int?
+  pregunta                            Int?
+  fecha                               DateTime              @db.Date
+  idmetodopago                        Int?
+  cursosenlaplataforma                cursosenlaplataforma? @relation(fields: [curso], references: [idcurso], onUpdate: NoAction)
+  metodospago                         metodospago?          @relation(fields: [idmetodopago], references: [id], onUpdate: NoAction)
+  usuarios_tutoria_idpupiloTousuarios usuarios?             @relation("tutoria_idpupiloTousuarios", fields: [idpupilo], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_tutoria_idtutorTousuarios  usuarios?             @relation("tutoria_idtutorTousuarios", fields: [idtutor], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  preguntas                           preguntas?            @relation(fields: [pregunta], references: [idpregunta], onUpdate: NoAction)
+}
+
+model universidades {
+  iduniversidad     Int             @id @default(autoincrement())
+  nombreuniversidad String          @db.VarChar(255)
+  conocimientos     conocimientos[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model usuarios {
+  id                                                                  Int                    @id @default(autoincrement())
+  idrol                                                               Int?
+  idnombre                                                            Int?
+  edad                                                                Int?
+  contrasenia                                                         String                 @db.VarChar(255)
+  correo                                                              String                 @unique @db.VarChar(255)
+  dni                                                                 String?                @unique @db.VarChar(45)
+  valoracion                                                          Float?                 @db.Real
+  foto_perfil                                                         Bytes?
+  horariodiponibleinicio                                              DateTime?              @db.Time(6)
+  horariodisponiblefin                                                DateTime?              @db.Time(6)
+  comentarios_comentarios_idusuariodacomentarioTousuarios             comentarios[]          @relation("comentarios_idusuariodacomentarioTousuarios")
+  comentarios_comentarios_idusuariorecibecomentarioTousuarios         comentarios[]          @relation("comentarios_idusuariorecibecomentarioTousuarios")
+  conocimientos                                                       conocimientos[]
+  experiencia                                                         experiencia[]
+  historialcontestadas_historialcontestadas_idusuariopupiloTousuarios historialcontestadas[] @relation("historialcontestadas_idusuariopupiloTousuarios")
+  historialcontestadas_historialcontestadas_idusuariotutorTousuarios  historialcontestadas[] @relation("historialcontestadas_idusuariotutorTousuarios")
+  preguntas                                                           preguntas[]
+  tutoria_tutoria_idpupiloTousuarios                                  tutoria[]              @relation("tutoria_idpupiloTousuarios")
+  tutoria_tutoria_idtutorTousuarios                                   tutoria[]              @relation("tutoria_idtutorTousuarios")
+  nombres                                                             nombres?               @relation(fields: [idnombre], references: [idnombre], onDelete: Cascade, onUpdate: NoAction)
+  roles                                                               roles?                 @relation(fields: [idrol], references: [idrol], onUpdate: NoAction)
+}
