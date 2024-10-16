@@ -82,7 +82,7 @@ export class AuthService {
 
             const verificationCode = this.generateVerificationCode();
 
-            const verificationExpiry = addMinutes(new Date(), 15);
+            const verificationExpiry = addMinutes(new Date(), 15).toISOString();;
 
             // DATOS DE USUARIO
             const user = await this.prismaService.usuarios.create({
@@ -150,6 +150,36 @@ export class AuthService {
             throw new BadRequestException(error.message || 'Error al cambiar contraseña');
         }
         
+    }
+
+    async verifyEmail(code: string): Promise<{ message: string }>{
+        
+        const user = await this.prismaService.usuarios.findFirst({
+            where: {
+                verificationcode: code, 
+            },
+        });
+
+        if(!user){
+            throw new BadRequestException('Código de verificación incorrecto');
+        };
+
+        const now = new Date();
+        if(user.verificationexpiry && user.verificationexpiry < now){
+            throw new BadRequestException('El código de verificación ha expirado');
+        }
+
+        // Marcar como verificado y eliminar codigo
+        await this.prismaService.usuarios.update({
+            where: {id: user.id},
+            data: {
+                isverified: true,
+                verificationcode: null,
+                verificationexpiry: null
+            },
+        });
+
+        return { message: 'Usuario verificado con exito' }
     }
 
     // Generar un código aleatorio de 6 dígitos

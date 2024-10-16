@@ -25,4 +25,9 @@ export class AuthController {
         return this.authService.updatePassword(parseInt(id), updatePasswordDto)
     }
 
+    @Post('/sign-up/verify')
+    verifyUser(@Body('code') code: string){
+        return this.authService.verifyEmail(code);
+    }
+
 }

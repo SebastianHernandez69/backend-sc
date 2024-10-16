@@ -28,7 +28,7 @@ export class EmailService {
         const msg = {
             to: email,
             from: 'sharkcat.info@gmail.com',
-            subject: 'codigo de recuperacion de contraseña',
+            subject: 'Codigo de recuperacion de contraseña',
             text: `Tu codigo de recuperacion es: ${code}`,
             html: `<p>Tu codigo de recuperacion es:</p><strong>${code}</strong>`,
         }
