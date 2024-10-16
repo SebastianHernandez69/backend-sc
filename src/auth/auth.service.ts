@@ -3,13 +3,16 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { encrypt } from 'src/libs/bcrypt';
 import { compare } from 'bcrypt';
+import * as crypto from 'crypto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-pass.dto';
+import { addMinutes } from 'date-fns';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AuthService {
 
-    constructor(private prismaService: PrismaService){}
+    constructor(private prismaService: PrismaService, private emailService: EmailService){}
 
     // Servicio para iniciar sesion
     async login(loginUserDto: LoginUserDto){
@@ -77,6 +80,10 @@ export class AuthService {
             // HASH
             const hashPass = await encrypt(registerUserDto.contrasenia);
 
+            const verificationCode = this.generateVerificationCode();
+
+            const verificationExpiry = addMinutes(new Date(), 15);
+
             // DATOS DE USUARIO
             const user = await this.prismaService.usuarios.create({
                 data: {
@@ -89,12 +96,16 @@ export class AuthService {
                 valoracion: registerUserDto.valoracion,
                 foto_perfil: registerUserDto.foto_Perfil,
                 horariodiponibleinicio: horaInicio.toISOString(),
-                horariodisponiblefin: horaFin.toISOString()
+                horariodisponiblefin: horaFin.toISOString(),
+                isverified: false,
+                verificationcode: verificationCode,
+                verificationexpiry: verificationExpiry
                 },
             });
 
-            const { contrasenia: _, ...userPassless } = user;
+            await this.emailService.sendVerificationEmail(correo, verificationCode);
 
+            const { contrasenia: _, ...userPassless } = user;
 
             return userPassless;
 
@@ -140,5 +151,10 @@ export class AuthService {
         }
         
     }
+
+    // Generar un código aleatorio de 6 dígitos
+  private generateVerificationCode(): string {
+    return crypto.randomInt(100000, 999999).toString();
+  }
 
 }

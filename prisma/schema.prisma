@@ -204,6 +204,9 @@ model usuarios {
   foto_perfil                                                         Bytes?
   horariodiponibleinicio                                              DateTime?              @db.Time(6)
   horariodisponiblefin                                                DateTime?              @db.Time(6)
+  isverified                                                          Boolean?
+  verificationcode                                                    String?                @db.VarChar(30)
+  verificationexpiry                                                  DateTime?              @db.Date
   comentarios_comentarios_idusuariodacomentarioTousuarios             comentarios[]          @relation("comentarios_idusuariodacomentarioTousuarios")
   comentarios_comentarios_idusuariorecibecomentarioTousuarios         comentarios[]          @relation("comentarios_idusuariorecibecomentarioTousuarios")
   conocimientos                                                       conocimientos[]
