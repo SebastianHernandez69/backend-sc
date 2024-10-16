@@ -8,6 +8,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-pass.dto';
 import { addMinutes } from 'date-fns';
 import { EmailService } from 'src/email/email.service';
+import { ResetPasswordDto } from './dto/reset-pass.dto';
 
 @Injectable()
 export class AuthService {
@@ -180,6 +181,65 @@ export class AuthService {
         });
 
         return { message: 'Usuario verificado con exito' }
+    }
+
+    // Request password reset code
+    async requestPasswordReset(correo: string): Promise<void>{
+        const user = await this.prismaService.usuarios.findUnique({
+            where: {correo}
+        });
+
+        if(!user){
+            throw new BadRequestException('Usuario no encontrado');
+        }
+
+        const verificationCode = this.generateVerificationCode();
+        const verificationExpiry = addMinutes(new Date(), 15);
+
+        await this.prismaService.usuarios.update({
+            where:{
+                id: user.id
+            },
+            data:{
+                verificationcode: verificationCode,
+                verificationexpiry: verificationExpiry
+            }
+        });
+
+        await this.emailService.sendResetPassEmail(correo, verificationCode);
+        
+    }
+
+    // Reset pass
+    async resetPassword(resetPasswordDto: ResetPasswordDto){
+        const { code, newPassword } = resetPasswordDto;
+
+        const user = await this.prismaService.usuarios.findFirst({
+            where: {
+                verificationcode: code
+            }
+        });
+
+        if(!user){
+            throw new BadRequestException('Código de verificación inválido');
+        }
+
+        const now = new Date();
+
+        if(user.verificationexpiry && user.verificationexpiry < now){
+            throw new BadRequestException('El código de verificación ha expirado');
+        }
+
+        const newHashPassword = await encrypt(newPassword);
+
+        await this.prismaService.usuarios.update({
+            where: {id: user.id},
+            data: {
+                contrasenia: newHashPassword,
+                verificationcode: null,
+                verificationexpiry: null
+            }
+        });
     }
 
     // Generar un código aleatorio de 6 dígitos
