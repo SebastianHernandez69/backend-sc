@@ -5,11 +5,15 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { EmailService } from 'src/email/email.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PassportModule } from '@nestjs/passport';
+import { LocalStrategy } from './strategies/local.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
-  providers: [AuthService,EmailService],
+  providers: [AuthService,EmailService,LocalStrategy,JwtStrategy],
   controllers: [AuthController],
   imports: [
+      PassportModule,
       ConfigModule.forRoot({ isGlobal: true }), 
       PrismaModule,
       JwtModule.registerAsync({

@@ -1,9 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Post, HttpCode  } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, HttpCode, UseGuards, Req  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-pass.dto';
 import { ResetPasswordDto } from './dto/reset-pass.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { Request } from 'express';
+import { JwtPayload } from 'src/interfaces/JwtPayload';
 
 @Controller('auth')
 export class AuthController {
@@ -22,9 +26,11 @@ export class AuthController {
         return this.authService.signUp(registerUserDto);
     }
 
-    @Patch('/pass-update/:id')
-    updatePassword(@Param('id') id: string, @Body() updatePasswordDto: UpdatePasswordDto){
-        return this.authService.updatePassword(parseInt(id), updatePasswordDto)
+    @Patch('/pass-update')
+    @UseGuards(JwtAuthGuard)
+    updatePassword(@Req() req: Request, @Body() updatePasswordDto: UpdatePasswordDto){
+        const user = req.user as JwtPayload;
+        return this.authService.updatePassword(user.sub, updatePasswordDto)
     }
 
     @Post('/sign-up/verify')
