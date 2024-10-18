@@ -7,22 +7,22 @@ export class HomeService {
     constructor (private prismaService: PrismaService){};
 
     async constGetHomeUser(id: number){
-        const idN = await this.prismaService.usuarios.findUnique({
-           where: {id},
+        const idN = await this.prismaService.usuario.findUnique({
+           where: {idUsuario: id},
             select: {
-                idnombre: true,
+                idNombre: true,
             }
         });
 
-        const idnombre = idN.idnombre;
+        const idNombre = idN.idNombre;
 
-        const nombres = await this.prismaService.nombres.findUnique({
-            where: {idnombre},
+        const nombres = await this.prismaService.nombre.findUnique({
+            where: {idNombre},
             select: {
-                primernombre: true,
-                segundonombre: true,
-                primerapellido: true,
-                segundoapellido: true
+                primerNombre: true,
+                segundoNombre: true,
+                primerApellido: true,
+                segundoApellido: true
             }
         });
 

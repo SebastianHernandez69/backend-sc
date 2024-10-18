@@ -7,215 +7,175 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model administrador {
-  idadministrador                Int                              @id @default(autoincrement())
-  idnombre                       Int?
-  contrasenia                    String                           @db.VarChar(255)
-  nombres                        nombres?                         @relation(fields: [idnombre], references: [idnombre], onDelete: Cascade, onUpdate: NoAction)
-  historialcambioshechosporadmin historialcambioshechosporadmin[]
+model admin {
+  idAdmin     Int    @id @default(autoincrement())
+  correo      String @db.VarChar(100)
+  contrasenia String @db.VarChar(255)
+  idNombre    Int
+  nombre      nombre @relation(fields: [idNombre], references: [idNombre], onDelete: NoAction, onUpdate: NoAction, map: "admin_idnombre_foreign")
 }
 
-model categorias {
-  idcategoria          Int                    @id @default(autoincrement())
-  nombrecategoria      String                 @db.VarChar(100)
-  cursosenlaplataforma cursosenlaplataforma[]
-  preguntas            preguntas[]
+model categoria {
+  idCategoria  Int       @id @default(autoincrement())
+  categoria    String    @db.VarChar(150)
+  imgCategoria String    @db.VarChar(255)
+  materia      materia[]
 }
 
-model comentarios {
-  idcomentario                                             Int       @id @default(autoincrement())
-  comentario                                               String
-  idusuariodacomentario                                    Int?
-  idusuariorecibecomentario                                Int?
-  usuarios_comentarios_idusuariodacomentarioTousuarios     usuarios? @relation("comentarios_idusuariodacomentarioTousuarios", fields: [idusuariodacomentario], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  usuarios_comentarios_idusuariorecibecomentarioTousuarios usuarios? @relation("comentarios_idusuariorecibecomentarioTousuarios", fields: [idusuariorecibecomentario], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model comentario {
+  idComentario                                          Int     @id @default(autoincrement())
+  idUsuarioComenta                                      Int
+  idUsuarioRecibeComentario                             Int
+  comentario                                            String
+  usuario_comentario_idUsuarioComentaTousuario          usuario @relation("comentario_idUsuarioComentaTousuario", fields: [idUsuarioComenta], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "comentario_idusuariocomenta_foreign")
+  usuario_comentario_idUsuarioRecibeComentarioTousuario usuario @relation("comentario_idUsuarioRecibeComentarioTousuario", fields: [idUsuarioRecibeComentario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "comentario_idusuariorecibecomentario_foreign")
 }
 
-model conocimientos {
-  idconocimientos Int            @id @default(autoincrement())
-  iduniversidad   Int?
-  idtitulo        Int?
-  idusuariotutor  Int?
-  fechaegreso     DateTime       @db.Date
-  titulos         titulos?       @relation(fields: [idtitulo], references: [idtitulo], onUpdate: NoAction)
-  universidades   universidades? @relation(fields: [iduniversidad], references: [iduniversidad], onUpdate: NoAction)
-  usuarios        usuarios?      @relation(fields: [idusuariotutor], references: [id], onUpdate: NoAction)
+model conocimiento {
+  idConocimiento  Int         @id @default(autoincrement())
+  idUsuario       Int
+  idInstitucion   Int
+  tituloAcademico String      @db.VarChar(255)
+  fechaEgreso     DateTime    @db.Date
+  institucion     institucion @relation(fields: [idInstitucion], references: [idInstitucion], onDelete: NoAction, onUpdate: NoAction, map: "conocimiento_idinstitucion_foreign")
+  usuario         usuario     @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "conocimiento_idusuario_foreign")
 }
 
-model cursosenlaplataforma {
-  idcurso     Int         @id @default(autoincrement())
-  nombrecurso String      @db.VarChar(255)
-  idcategoria Int?
-  imagen      Bytes?
-  descripcion String?
-  categorias  categorias? @relation(fields: [idcategoria], references: [idcategoria], onUpdate: NoAction)
-  tutoria     tutoria[]
+model estadoOfertaSolucion {
+  idEstadoOferta   Int                @id @default(autoincrement())
+  estadoOferta     String?            @db.VarChar(100)
+  ofertaresolucion ofertaresolucion[]
 }
 
-model estadopregunta {
-  idestadop Int         @id @default(autoincrement())
-  estado    String?     @db.VarChar(45)
-  preguntas preguntas[]
+model estadoPregunta {
+  idEstadoPregunta Int        @id @default(autoincrement())
+  estadoPregunta   String     @db.VarChar(100)
+  pregunta         pregunta[]
 }
 
 model experiencia {
-  idexperiencia Int       @id @default(autoincrement())
-  idusuario     Int?
-  idpuesto      Int?
-  empresa       String?   @db.VarChar(45)
-  descripcion   String?
-  puestos       puestos?  @relation(fields: [idpuesto], references: [idpuesto], onUpdate: NoAction)
-  usuarios      usuarios? @relation(fields: [idusuario], references: [id], onUpdate: NoAction)
+  idExperiencia Int      @id @default(autoincrement())
+  idUsuario     Int
+  idPuesto      Int
+  empresa       String   @db.VarChar(150)
+  fechaInicio   DateTime @db.Date
+  fechaFin      DateTime @db.Date
+  descripcion   String   @db.VarChar(255)
+  puesto        puesto   @relation(fields: [idPuesto], references: [idPuesto], onDelete: NoAction, onUpdate: NoAction, map: "experiencia_idpuesto_foreign")
+  usuario       usuario  @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "experiencia_idusuario_foreign")
 }
 
-model historialcambioshechosporadmin {
-  idcambio        Int            @id @default(autoincrement())
-  fecha           DateTime       @db.Timestamp(6)
-  descripcion     String
-  idadministrador Int?
-  administrador   administrador? @relation(fields: [idadministrador], references: [idadministrador], onDelete: Cascade, onUpdate: NoAction)
+model imgpregunta {
+  idImg      Int      @id @default(autoincrement())
+  idPregunta Int
+  img        String   @db.VarChar(255)
+  pregunta   pregunta @relation(fields: [idPregunta], references: [idPregunta], onDelete: NoAction, onUpdate: NoAction, map: "imgpregunta_idpregunta_foreign")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model historialcontestadas {
-  idhistorial                                             Int        @id @default(autoincrement())
-  idpregunta                                              Int?
-  idusuariotutor                                          Int?
-  idusuariopupilo                                         Int?
-  fechacontestacion                                       DateTime?  @db.Timestamp(6)
-  precioacordado                                          Decimal?   @db.Decimal(10, 2)
-  valoracion                                              Float?     @db.Real
-  preguntas                                               preguntas? @relation(fields: [idpregunta], references: [idpregunta], onUpdate: NoAction)
-  usuarios_historialcontestadas_idusuariopupiloTousuarios usuarios?  @relation("historialcontestadas_idusuariopupiloTousuarios", fields: [idusuariopupilo], references: [id], onUpdate: NoAction)
-  usuarios_historialcontestadas_idusuariotutorTousuarios  usuarios?  @relation("historialcontestadas_idusuariotutorTousuarios", fields: [idusuariotutor], references: [id], onUpdate: NoAction)
+model institucion {
+  idInstitucion Int            @id @default(autoincrement())
+  institucion   String         @db.VarChar(255)
+  conocimiento  conocimiento[]
 }
 
-model imgpreguta {
-  idimg      Int        @id @default(autoincrement())
-  idpregunta Int?
-  img        Bytes?
-  preguntas  preguntas? @relation(fields: [idpregunta], references: [idpregunta], onUpdate: NoAction)
+model interes_pupilo {
+  idInteres Int     @id @default(autoincrement())
+  idUsuario Int
+  idMateria Int
+  materia   materia @relation(fields: [idMateria], references: [idMateria], onDelete: NoAction, onUpdate: NoAction, map: "interes_pupilo_idmateria_foreign")
+  usuario   usuario @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "interes_pupilo_idusuario_foreign")
 }
 
-model informaciongeneralsharkcat {
-  idinformaciongral Int        @id @default(autoincrement())
-  informacionlegal  String?    @db.VarChar(255)
-  redessociales     Int?
-  redsocial         redsocial? @relation(fields: [redessociales], references: [idred], onUpdate: NoAction)
-  sharkcat          sharkcat[]
+model materia {
+  idMateria      Int              @id @default(autoincrement())
+  idCategoria    Int
+  materia        String           @db.VarChar(150)
+  interes_pupilo interes_pupilo[]
+  categoria      categoria        @relation(fields: [idCategoria], references: [idCategoria], onDelete: NoAction, onUpdate: NoAction, map: "materia_idcategoria_foreign")
+  materia_tutor  materia_tutor[]
+  pregunta       pregunta[]
 }
 
-model metodospago {
-  id         Int       @id @default(autoincrement())
-  metodopago String    @db.VarChar(100)
-  tutoria    tutoria[]
+model materia_tutor {
+  idInteresTutor Int     @id @default(autoincrement())
+  idUsuario      Int
+  idMateria      Int
+  materia        materia @relation(fields: [idMateria], references: [idMateria], onDelete: NoAction, onUpdate: NoAction, map: "materia_tutor_idmateria_foreign")
+  usuario        usuario @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "materia_tutor_idusuario_foreign")
 }
 
-model nombres {
-  idnombre        Int             @id @default(autoincrement())
-  primernombre    String?         @db.VarChar(100)
-  segundonombre   String?         @db.VarChar(100)
-  primerapellido  String?         @db.VarChar(100)
-  segundoapellido String?         @db.VarChar(100)
-  administrador   administrador[]
-  usuarios        usuarios[]
+model nombre {
+  idNombre        Int       @id @default(autoincrement())
+  primerNombre    String    @db.VarChar(255)
+  segundoNombre   String?   @db.VarChar(150)
+  primerApellido  String    @db.VarChar(150)
+  segundoApellido String?   @db.VarChar(150)
+  admin           admin[]
+  usuario         usuario[]
 }
 
-model preguntas {
-  idpregunta           Int                    @id @default(autoincrement())
-  idcategoria          Int?
-  idusuariopupilo      Int?
-  idestadop            Int?
-  titulo               String                 @db.VarChar(255)
-  descripcion          String?
-  fechapublicacion     DateTime?              @db.Timestamp(6)
-  historialcontestadas historialcontestadas[]
-  imgpreguta           imgpreguta[]
-  categorias           categorias?            @relation(fields: [idcategoria], references: [idcategoria], onUpdate: NoAction)
-  estadopregunta       estadopregunta?        @relation(fields: [idestadop], references: [idestadop], onUpdate: NoAction)
-  usuarios             usuarios?              @relation(fields: [idusuariopupilo], references: [id], onUpdate: NoAction)
-  tutoria              tutoria[]
+model ofertaresolucion {
+  idOferta             Int                  @id @default(autoincrement())
+  idUsuarioTutor       Int
+  idPregunta           Int
+  idEstadoOferta       Int
+  descripcion          String
+  fechaOferta          DateTime             @db.Date
+  estadoOfertaSolucion estadoOfertaSolucion @relation(fields: [idEstadoOferta], references: [idEstadoOferta], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idestadooferta_foreign")
+  pregunta             pregunta             @relation(fields: [idPregunta], references: [idPregunta], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idpregunta_foreign")
+  usuario              usuario              @relation(fields: [idUsuarioTutor], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idusuariotutor_foreign")
 }
 
-model puestos {
-  idpuesto    Int           @id @default(autoincrement())
-  puesto      String?       @db.VarChar(45)
+model pregunta {
+  idPregunta       Int                @id @default(autoincrement())
+  idMateria        Int
+  idUsuarioPupilo  Int
+  titulo           String             @db.VarChar(150)
+  descripcion      String
+  idEstadoPregunta Int
+  imgpregunta      imgpregunta[]
+  ofertaresolucion ofertaresolucion[]
+  estadoPregunta   estadoPregunta     @relation(fields: [idEstadoPregunta], references: [idEstadoPregunta], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idestadopregunta_foreign")
+  materia          materia            @relation(fields: [idMateria], references: [idMateria], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idmateria_foreign")
+  usuario          usuario            @relation(fields: [idUsuarioPupilo], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idusuariopupilo_foreign")
+}
+
+model puesto {
+  idPuesto    Int           @id @default(autoincrement())
+  puesto      String        @db.VarChar(100)
   experiencia experiencia[]
 }
 
-model redsocial {
-  idred                      Int                          @id @default(autoincrement())
-  nombre                     String                       @db.VarChar(100)
-  logo                       String?                      @db.VarChar(255)
-  url                        String?                      @db.VarChar(255)
-  informaciongeneralsharkcat informaciongeneralsharkcat[]
+model rol {
+  idRol   Int       @id @default(autoincrement())
+  rol     String    @db.VarChar(150)
+  usuario usuario[]
 }
 
-model roles {
-  idrol     Int        @id @default(autoincrement())
-  nombrerol String     @db.VarChar(50)
-  usuarios  usuarios[]
-}
-
-model sharkcat {
-  idsc                       Int                         @id @default(autoincrement())
-  nombre                     String                      @db.VarChar(100)
-  idinformaciongral          Int?
-  informaciongeneralsharkcat informaciongeneralsharkcat? @relation(fields: [idinformaciongral], references: [idinformaciongral], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model titulos {
-  idtitulo      Int             @id @default(autoincrement())
-  nombre        String          @db.VarChar(255)
-  conocimientos conocimientos[]
-}
-
-model tutoria {
-  idtutoria                           Int                   @id @default(autoincrement())
-  idtutor                             Int?
-  idpupilo                            Int?
-  curso                               Int?
-  pregunta                            Int?
-  fecha                               DateTime              @db.Date
-  idmetodopago                        Int?
-  cursosenlaplataforma                cursosenlaplataforma? @relation(fields: [curso], references: [idcurso], onUpdate: NoAction)
-  metodospago                         metodospago?          @relation(fields: [idmetodopago], references: [id], onUpdate: NoAction)
-  usuarios_tutoria_idpupiloTousuarios usuarios?             @relation("tutoria_idpupiloTousuarios", fields: [idpupilo], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  usuarios_tutoria_idtutorTousuarios  usuarios?             @relation("tutoria_idtutorTousuarios", fields: [idtutor], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  preguntas                           preguntas?            @relation(fields: [pregunta], references: [idpregunta], onUpdate: NoAction)
-}
-
-model universidades {
-  iduniversidad     Int             @id @default(autoincrement())
-  nombreuniversidad String          @db.VarChar(255)
-  conocimientos     conocimientos[]
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model usuarios {
-  id                                                                  Int                    @id @default(autoincrement())
-  idrol                                                               Int?
-  idnombre                                                            Int?
-  edad                                                                Int?
-  contrasenia                                                         String                 @db.VarChar(255)
-  correo                                                              String                 @unique @db.VarChar(255)
-  dni                                                                 String?                @unique @db.VarChar(45)
-  valoracion                                                          Float?                 @db.Real
-  foto_perfil                                                         Bytes?
-  horariodiponibleinicio                                              DateTime?              @db.Time(6)
-  horariodisponiblefin                                                DateTime?              @db.Time(6)
-  isverified                                                          Boolean?
-  verificationcode                                                    String?                @db.VarChar(30)
-  verificationexpiry                                                  DateTime?              @db.Date
-  comentarios_comentarios_idusuariodacomentarioTousuarios             comentarios[]          @relation("comentarios_idusuariodacomentarioTousuarios")
-  comentarios_comentarios_idusuariorecibecomentarioTousuarios         comentarios[]          @relation("comentarios_idusuariorecibecomentarioTousuarios")
-  conocimientos                                                       conocimientos[]
-  experiencia                                                         experiencia[]
-  historialcontestadas_historialcontestadas_idusuariopupiloTousuarios historialcontestadas[] @relation("historialcontestadas_idusuariopupiloTousuarios")
-  historialcontestadas_historialcontestadas_idusuariotutorTousuarios  historialcontestadas[] @relation("historialcontestadas_idusuariotutorTousuarios")
-  preguntas                                                           preguntas[]
-  tutoria_tutoria_idpupiloTousuarios                                  tutoria[]              @relation("tutoria_idpupiloTousuarios")
-  tutoria_tutoria_idtutorTousuarios                                   tutoria[]              @relation("tutoria_idtutorTousuarios")
-  nombres                                                             nombres?               @relation(fields: [idnombre], references: [idnombre], onDelete: Cascade, onUpdate: NoAction)
-  roles                                                               roles?                 @relation(fields: [idrol], references: [idrol], onUpdate: NoAction)
+model usuario {
+  idUsuario                                                Int                @id @default(autoincrement())
+  idRol                                                    Int
+  idNombre                                                 Int
+  edad                                                     Int
+  correo                                                   String             @unique @db.VarChar(150)
+  contrasenia                                              String             @db.VarChar(255)
+  dni                                                      String             @db.VarChar(60)
+  telefono                                                 String             @db.VarChar(50)
+  valoracion                                               Float
+  fotoPerfil                                               String?            @db.VarChar(255)
+  horarioDisponibleInicio                                  DateTime           @db.Date
+  horarioDisponibleFin                                     DateTime           @db.Date
+  isverified                                               Boolean
+  verificationcode                                         String?            @db.VarChar(30)
+  verificationexpiry                                       DateTime?          @db.Date
+  comentario_comentario_idUsuarioComentaTousuario          comentario[]       @relation("comentario_idUsuarioComentaTousuario")
+  comentario_comentario_idUsuarioRecibeComentarioTousuario comentario[]       @relation("comentario_idUsuarioRecibeComentarioTousuario")
+  conocimiento                                             conocimiento[]
+  experiencia                                              experiencia[]
+  interes_pupilo                                           interes_pupilo[]
+  materia_tutor                                            materia_tutor[]
+  ofertaresolucion                                         ofertaresolucion[]
+  pregunta                                                 pregunta[]
+  nombre                                                   nombre             @relation(fields: [idNombre], references: [idNombre], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idnombre_foreign")
+  rol                                                      rol                @relation(fields: [idRol], references: [idRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idrol_foreign")
 }
