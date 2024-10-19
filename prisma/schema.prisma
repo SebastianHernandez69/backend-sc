@@ -122,7 +122,7 @@ model ofertaresolucion {
   idPregunta           Int
   idEstadoOferta       Int
   descripcion          String
-  fechaOferta          DateTime             @db.Timestamp(6)
+  fechaOferta          DateTime             @db.Timestamptz(6)
   estadoOfertaSolucion estadoOfertaSolucion @relation(fields: [idEstadoOferta], references: [idEstadoOferta], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idestadooferta_foreign")
   pregunta             pregunta             @relation(fields: [idPregunta], references: [idPregunta], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idpregunta_foreign")
   usuario              usuario              @relation(fields: [idUsuarioTutor], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idusuariotutor_foreign")

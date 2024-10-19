@@ -2,6 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PreguntaDto } from './dto/pregunta.dto';
 import { format } from 'date-fns';
+import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
+import e from 'express';
 
 @Injectable()
 export class UserService {
@@ -131,5 +133,33 @@ export class UserService {
         }
     }
 
+    // Tutor envia oferta de solucion a la pregunta
+    async sendOfertaSolucion(idTutor: number, ofertaPreguntaDto: OfertaPreguntaDto){
+
+        try {
+            const existOferta = await this.prismaService.ofertaresolucion.findFirst({
+                where:{
+                    idUsuarioTutor: idTutor,
+                    idPregunta: ofertaPreguntaDto.idPregunta
+                }
+            });
     
+            if(existOferta){
+               throw new BadRequestException("Ya se envio una oferta para esta pregunta"); 
+            }
+    
+            const nvaOfertaPregunta = await this.prismaService.ofertaresolucion.create({
+                data: {
+                    idUsuarioTutor: idTutor,
+                    idPregunta: ofertaPreguntaDto.idPregunta,
+                    idEstadoOferta: 1,
+                    descripcion: ofertaPreguntaDto.descripcion,
+                    fechaOferta: new Date()
+                }
+            });
+            return nvaOfertaPregunta;
+        } catch (error) {
+            throw new BadRequestException("Error al enviar la oferta: "+error);
+        }
+    }
 }

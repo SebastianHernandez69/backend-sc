@@ -4,6 +4,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { Request } from 'express';
 import { JwtPayload } from 'src/interfaces/JwtPayload';
 import { PreguntaDto } from './dto/pregunta.dto';
+import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,5 +34,15 @@ export class UserController {
   async getUserProfile(@Req() req: Request){
     const user = req.user as JwtPayload;
     return await this.userService.getUserProfile(user.sub, user.rol);
+  }
+
+  // Tutor envia oferta de solicion a pregunta
+  @Post("/pregunta/send-offer")
+  @UseGuards(JwtAuthGuard)
+  async sendOfertaSolucion(@Req() req: Request, @Body() ofertaPreguntaDto: OfertaPreguntaDto){
+    const user = req.user as JwtPayload;
+    if(user.rol === 1){
+      return await this.userService.sendOfertaSolucion(user.sub, ofertaPreguntaDto);
+    }
   }
 }
