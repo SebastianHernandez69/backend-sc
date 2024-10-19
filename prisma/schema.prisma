@@ -18,7 +18,7 @@ model admin {
 model categoria {
   idCategoria  Int       @id @default(autoincrement())
   categoria    String    @db.VarChar(150)
-  imgCategoria String    @db.VarChar(255)
+  imgCategoria String?   @db.VarChar(255)
   materia      materia[]
 }
 
@@ -163,11 +163,11 @@ model usuario {
   telefono                                                 String             @db.VarChar(50)
   valoracion                                               Float
   fotoPerfil                                               String?            @db.VarChar(255)
-  horarioDisponibleInicio                                  DateTime           @db.Date
-  horarioDisponibleFin                                     DateTime           @db.Date
+  horarioDisponibleInicio                                  DateTime           @db.Timestamp(6)
+  horarioDisponibleFin                                     DateTime           @db.Timestamp(6)
   isverified                                               Boolean
   verificationcode                                         String?            @db.VarChar(30)
-  verificationexpiry                                       DateTime?          @db.Date
+  verificationexpiry                                       DateTime?          @db.Timestamptz(6)
   comentario_comentario_idUsuarioComentaTousuario          comentario[]       @relation("comentario_idUsuarioComentaTousuario")
   comentario_comentario_idUsuarioRecibeComentarioTousuario comentario[]       @relation("comentario_idUsuarioRecibeComentarioTousuario")
   conocimiento                                             conocimiento[]

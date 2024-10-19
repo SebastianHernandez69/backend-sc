@@ -9,4 +9,5 @@ export class HomeController {
   homeUser(@Param('id') id: string){
     return this.homeService.constGetHomeUser(parseInt(id));
   }
+
 }
