@@ -84,6 +84,8 @@ model interes_pupilo {
   idMateria Int
   materia   materia @relation(fields: [idMateria], references: [idMateria], onDelete: NoAction, onUpdate: NoAction, map: "interes_pupilo_idmateria_foreign")
   usuario   usuario @relation(fields: [idUsuario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "interes_pupilo_idusuario_foreign")
+
+  @@unique([idUsuario, idMateria], map: "unique_usuario_materia")
 }
 
 model materia {
@@ -120,7 +122,7 @@ model ofertaresolucion {
   idPregunta           Int
   idEstadoOferta       Int
   descripcion          String
-  fechaOferta          DateTime             @db.Date
+  fechaOferta          DateTime             @db.Timestamp(6)
   estadoOfertaSolucion estadoOfertaSolucion @relation(fields: [idEstadoOferta], references: [idEstadoOferta], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idestadooferta_foreign")
   pregunta             pregunta             @relation(fields: [idPregunta], references: [idPregunta], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idpregunta_foreign")
   usuario              usuario              @relation(fields: [idUsuarioTutor], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "ofertaresolucion_idusuariotutor_foreign")
@@ -133,6 +135,7 @@ model pregunta {
   titulo           String             @db.VarChar(150)
   descripcion      String
   idEstadoPregunta Int
+  fechaPublicacion DateTime?          @db.Timestamptz(6)
   imgpregunta      imgpregunta[]
   ofertaresolucion ofertaresolucion[]
   estadoPregunta   estadoPregunta     @relation(fields: [idEstadoPregunta], references: [idEstadoPregunta], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idestadopregunta_foreign")
@@ -163,8 +166,8 @@ model usuario {
   telefono                                                 String             @db.VarChar(50)
   valoracion                                               Float
   fotoPerfil                                               String?            @db.VarChar(255)
-  horarioDisponibleInicio                                  DateTime           @db.Timestamp(6)
-  horarioDisponibleFin                                     DateTime           @db.Timestamp(6)
+  horarioDisponibleInicio                                  DateTime           @db.Time(6)
+  horarioDisponibleFin                                     DateTime           @db.Time(6)
   isverified                                               Boolean
   verificationcode                                         String?            @db.VarChar(30)
   verificationexpiry                                       DateTime?          @db.Timestamptz(6)
