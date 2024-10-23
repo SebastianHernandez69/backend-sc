@@ -47,7 +47,7 @@ export class UserController {
   }
 
   // Get all questions from a pupil
-  @Get("/pregunta")
+  @Get("/preguntas")
   @UseGuards(JwtAuthGuard)
   async obtenerPreguntasPupilo(@Req() req: Request){
     const user = req.user as JwtPayload;
