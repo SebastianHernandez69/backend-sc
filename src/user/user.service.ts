@@ -150,6 +150,26 @@ export class UserService {
         }
     }
 
+    // Get questions by materia_tutor
+    async obtenerPreguntasInteresTutor(idTutor: number){
+        const preguntasInteresTutor = await this.prismaService.pregunta.findMany({
+            where: {
+                materia: {
+                    materia_tutor: {
+                        some: {
+                            idUsuario: idTutor
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                fechaPublicacion: "desc"
+            }
+        });
+
+        return preguntasInteresTutor;
+    }
+
     // Tutor envia oferta de solucion a la pregunta
     async sendOfertaSolucion(idTutor: number, ofertaPreguntaDto: OfertaPreguntaDto){
 
@@ -179,4 +199,6 @@ export class UserService {
             throw new BadRequestException("Error al enviar la oferta: "+error);
         }
     }
+
+
 }

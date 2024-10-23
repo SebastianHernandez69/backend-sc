@@ -53,4 +53,13 @@ export class UserController {
     const user = req.user as JwtPayload;
     return this.userService.obtenerPreguntasPupilo(user.sub);
   }
+
+  // Get all questions by materia_tutor
+  @Get("/pregunta/interes-tutor")
+  @UseGuards(JwtAuthGuard)
+  async obtenerPreguntasInteresTutor(@Req() req: Request){
+    const user = req.user as JwtPayload;
+
+    return await this.userService.obtenerPreguntasInteresTutor(user.sub);
+  }
 }
