@@ -45,4 +45,12 @@ export class UserController {
       return await this.userService.sendOfertaSolucion(user.sub, ofertaPreguntaDto);
     }
   }
+
+  // Get all questions from a pupil
+  @Get("/pregunta")
+  @UseGuards(JwtAuthGuard)
+  async obtenerPreguntasPupilo(@Req() req: Request){
+    const user = req.user as JwtPayload;
+    return this.userService.obtenerPreguntasPupilo(user.sub);
+  }
 }

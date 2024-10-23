@@ -81,7 +81,6 @@ export class UserService {
         }
     }
 
-
     async getUserProfilePupilo(idUsuario: number){
         try {
             const user = await this.prismaService.usuario.findUnique({
@@ -130,6 +129,24 @@ export class UserService {
             return user;
         } catch (error) {
             throw new BadRequestException("Error a obtener perfil tutor: " + error);
+        }
+    }
+
+    // Get all questions from a pupil
+    async obtenerPreguntasPupilo(idPupilo: number){
+        try{
+
+            const preguntas = await this.prismaService.pregunta.findMany({
+                where: { idUsuarioPupilo: idPupilo },
+                orderBy: {
+                    fechaPublicacion: "asc"
+                }
+            });
+
+            return preguntas;
+
+        }catch(ex){
+            throw new BadRequestException("Error al obtener las preguntas"+ex);
         }
     }
 
