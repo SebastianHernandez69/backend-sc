@@ -18,6 +18,62 @@ export class AuthService {
         private jwtService: JwtService
     ){}
 
+    //
+    async validateGoogleUser(email: string, name: any, fotoPerfil: string){
+        try{
+            let user = await this.prismaService.usuario.findUnique({
+                where: {
+                    correo: email
+                }
+            });
+    
+            if(!user){
+                const { givenName: primerNombre, familyName: primerApellido } = name;
+    
+                const newName = await this.prismaService.nombre.create({
+                    data: {
+                        primerApellido,
+                        primerNombre,
+                        segundoNombre:'',
+                        segundoApellido: ''
+                    }
+                });
+    
+                user = await this.prismaService.usuario.create({
+                    data:{
+                        idRol: 1,
+                        dni: '1010',
+                        idNombre: newName.idNombre,
+                        correo: email,
+                        contrasenia: '',
+                        telefono: '90909090',
+                        edad: 20,
+                        valoracion: null,
+                        fotoPerfil: fotoPerfil,
+                        isverified: true,
+                        horarioDisponibleFin: null,
+                        horarioDisponibleInicio: null,
+                        verificationcode: null,
+                        verificationexpiry: null
+                    }
+                });
+            } else{
+                const payload = {
+                    sub: user.idUsuario,
+                    username: user.idNombre,
+                    rol: user.idRol
+                };
+    
+                const access_token = await this.jwtService.signAsync(payload);
+    
+                return {access_token};
+            }
+        }catch(error){
+            throw new BadRequestException("Error en registro/login de google"+error);
+        }
+    }
+
+
     // Servicio para iniciar sesion
     async login(loginUserDto: LoginUserDto){
 

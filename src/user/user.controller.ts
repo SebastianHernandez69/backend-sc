@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { Request } from 'express';
 import { JwtPayload } from 'src/interfaces/JwtPayload';
 import { PreguntaDto } from './dto/pregunta.dto';
 import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -34,6 +35,15 @@ export class UserController {
   async getUserProfile(@Req() req: Request){
     const user = req.user as JwtPayload;
     return await this.userService.getUserProfile(user.sub, user.rol);
+  }
+
+  // Uptade uesr info
+  @Patch("/update-info")
+  @UseGuards(JwtAuthGuard)
+  async updatedUserInfo(@Req() req: Request, @Body() updateUserDto: UpdateUserDto){
+    const user = req.user as JwtPayload;
+
+    return await this.userService.updateUserInfo(user.sub, updateUserDto);
   }
 
   // Tutor envia oferta de solicion a pregunta

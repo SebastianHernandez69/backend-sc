@@ -4,6 +4,7 @@ import { PreguntaDto } from './dto/pregunta.dto';
 import { format } from 'date-fns';
 import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
 import e from 'express';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -200,5 +201,49 @@ export class UserService {
         }
     }
 
+    async updateUserInfo(idUsuario: number, updateUserDto: UpdateUserDto){
+
+        try{
+
+            const user = await this.prismaService.usuario.findUnique({
+                where: {idUsuario}
+            })
+
+            const idNombre = user.idNombre;
+            const updatedUsername = await this.prismaService.nombre.update({
+                where: {idNombre: idNombre},
+                data: {
+                    primerNombre: updateUserDto.primerNombre,
+                    segundoNombre: updateUserDto.segundoNombre,
+                    primerApellido: updateUserDto.primerApellido,
+                    segundoApellido: updateUserDto.segundoApellido
+                }
+            });
+
+            const updatedUserInfo = await this.prismaService.usuario.update({
+                where: {
+                    idUsuario
+                },
+                data: {
+                    edad: updateUserDto.edad,
+                    telefono: updateUserDto.telefono,
+                    dni: updateUserDto.dni,
+                    horarioDisponibleFin: updateUserDto.horarioDisponibleFin,
+                    horarioDisponibleInicio: updateUserDto.horarioDisponibleInicio
+                }
+            });
+
+            const { contrasenia: _, ...useWithoutPass} = updatedUserInfo;
+
+            return {
+                updatedName: updatedUsername,
+                updatedUserInfo: useWithoutPass
+            }
+
+        } catch(error){
+            throw new BadRequestException("Error al actualizar la informacion de usuario"+error)
+        }
+
+    }
 
 }
