@@ -3,13 +3,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PreguntaDto } from './dto/pregunta.dto';
 import { format } from 'date-fns';
 import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
-import e from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class UserService {
 
-    constructor(private prismaService: PrismaService){
+    constructor(private prismaService: PrismaService, private readonly s3Service: S3Service){
 
     }
 
@@ -46,27 +46,42 @@ export class UserService {
 
 
     // Preguntas pupilo
-    async addPreguntaPupilo(idUsuario: number,preguntaDto: PreguntaDto){
+    async addPreguntaPupilo(idUsuario: number,preguntaDto: PreguntaDto, files: Express.Multer.File[]){
 
         const now = new Date();
 
         try{
             const pregunta = await this.prismaService.pregunta.create({
                 data: {
-                    idMateria: preguntaDto.idMateria,
+                    idMateria: parseInt(preguntaDto.idMateria),
+                    // idMateria: preguntaDto.idMateria,
                     idUsuarioPupilo: idUsuario,
                     titulo: preguntaDto.titulo,
                     descripcion: preguntaDto.descripcion,
-                    idEstadoPregunta: preguntaDto.idEstadoPregunta,
+                    idEstadoPregunta: parseInt(preguntaDto.idEstadoPregunta),
+                    // idEstadoPregunta: preguntaDto.idEstadoPregunta,
                     fechaPublicacion: now
                 }
             });
+
+            if(files.length > 0 ){
+                const uploadImgs = files.map(async (file) => {
+                    const imgUrl = await this.s3Service.uploadFile(file);
+                    await this.prismaService.imgpregunta.create({
+                        data: {
+                            idPregunta: pregunta.idPregunta,
+                            img: imgUrl
+                        }
+                    });
+                });
+    
+                await Promise.all(uploadImgs);
+            }
 
             return pregunta;
         }catch(error){
             throw new BadRequestException("Error al crear pregunta: "+error);
         }
-
     }
 
     // Perfil usuario
@@ -133,12 +148,30 @@ export class UserService {
         }
     }
 
-    // Get all questions from a pupil
+// Get all questions from a pupilo
     async obtenerPreguntasPupilo(idPupilo: number){
         try{
 
             const preguntas = await this.prismaService.pregunta.findMany({
                 where: { idUsuarioPupilo: idPupilo },
+                select:{
+                    idPregunta: true,
+                    idUsuarioPupilo: true,
+                    titulo: true,
+                    descripcion: true,
+                    idEstadoPregunta: true,
+                    fechaPublicacion: true,
+                    materia: {
+                        select:{
+                            materia: true,
+                        }
+                    },
+                    imgpregunta: {
+                        select: {
+                            img: true,
+                        }
+                    }
+                },
                 orderBy: {
                     fechaPublicacion: "asc"
                 }

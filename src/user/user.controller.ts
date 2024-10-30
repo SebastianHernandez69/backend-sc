@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { Request } from 'express';
@@ -6,6 +6,7 @@ import { JwtPayload } from 'src/interfaces/JwtPayload';
 import { PreguntaDto } from './dto/pregunta.dto';
 import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('user')
 export class UserController {
@@ -22,11 +23,10 @@ export class UserController {
   // Preguntas
   @Post('/pregunta/add')
   @UseGuards(JwtAuthGuard)
-  async addPreguntaPupilo(@Req() req: Request, @Body() preguntaDto: PreguntaDto){
-
+  @UseInterceptors(FilesInterceptor('files',3))
+  async addPreguntaPupilo(@Req() req: Request, @Body() preguntaDto: PreguntaDto,@UploadedFiles() files?: Express.Multer.File[]){
     const user = req.user as JwtPayload;
-    return await this.userService.addPreguntaPupilo(user.sub, preguntaDto);
-
+    return await this.userService.addPreguntaPupilo(user.sub, preguntaDto,files || []);
   }
 
   //Perfil del usuario

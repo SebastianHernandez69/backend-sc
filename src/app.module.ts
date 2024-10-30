@@ -6,9 +6,12 @@ import { EmailService } from './email/email.service';
 import { CategoriesModule } from './categories/categories.module';
 import { MateriaModule } from './materia/materia.module';
 import { UserModule } from './user/user.module';
+import { S3Module } from './s3/s3.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AuthModule, PrismaModule, HomeModule, CategoriesModule, MateriaModule, UserModule],
+  imports: [AuthModule, PrismaModule, HomeModule, CategoriesModule, MateriaModule, UserModule, 
+    S3Module, ConfigModule.forRoot({isGlobal: true})],
   controllers: [],
   providers: [EmailService],
 })
