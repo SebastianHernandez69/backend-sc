@@ -92,6 +92,7 @@ model materia {
   idMateria      Int              @id @default(autoincrement())
   idCategoria    Int
   materia        String           @db.VarChar(150)
+  imgMateria     String?          @db.VarChar(255)
   interes_pupilo interes_pupilo[]
   categoria      categoria        @relation(fields: [idCategoria], references: [idCategoria], onDelete: NoAction, onUpdate: NoAction, map: "materia_idcategoria_foreign")
   materia_tutor  materia_tutor[]

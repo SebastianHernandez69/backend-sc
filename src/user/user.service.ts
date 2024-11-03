@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PreguntaDto } from './dto/pregunta.dto';
 import { format } from 'date-fns';
 import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { S3Service } from 'src/s3/s3.service';
+import { preguntaSelect } from './dto/pregunta-select';
 
 @Injectable()
 export class UserService {
@@ -112,7 +113,6 @@ export class UserService {
                     horarioDisponibleInicio: true,
                     horarioDisponibleFin:true,
                     rol: true,
-                    pregunta: true
                 }
             });
     
@@ -138,7 +138,12 @@ export class UserService {
                     horarioDisponibleFin:true,
                     rol: true,
                     experiencia: true,
-                    conocimiento: true
+                    conocimiento: true,
+                    materia_tutor: {
+                        select: {
+                            materia:true
+                        }
+                    }
                 }
             });
     
@@ -148,60 +153,40 @@ export class UserService {
         }
     }
 
-// Get all questions from a pupilo
-    async obtenerPreguntasPupilo(idPupilo: number){
-        try{
+    // Método para obtener preguntas de un pupilo
+    async obtenerPreguntasPupilo(idPupilo: number) {
+        return this.obtenerPreguntas({ idUsuarioPupilo: idPupilo });
+    }
+    
+    // Método para obtener preguntas de interés para el tutor
+    async obtenerPreguntasInteresTutor(idTutor: number) {
+        return this.obtenerPreguntas({
+            materia: {
+                materia_tutor: { some: { idUsuario: idTutor } }
+            },
+            idEstadoPregunta: 1
+        }, idTutor);
+    }
 
+    // obtener preguntas general
+    async obtenerPreguntas(where: any, idTutor?: number){
+        try {
             const preguntas = await this.prismaService.pregunta.findMany({
-                where: { idUsuarioPupilo: idPupilo },
+                where,
                 select:{
-                    idPregunta: true,
-                    idUsuarioPupilo: true,
-                    titulo: true,
-                    descripcion: true,
-                    idEstadoPregunta: true,
-                    fechaPublicacion: true,
-                    materia: {
-                        select:{
-                            materia: true,
-                        }
-                    },
-                    imgpregunta: {
-                        select: {
-                            img: true,
-                        }
-                    }
+                    ...preguntaSelect,
+                    ...(idTutor && {ofertaresolucion:{
+                        where: {idUsuarioTutor: idTutor},
+                        select: preguntaSelect.ofertaresolucion.select
+                    }})
                 },
-                orderBy: {
-                    fechaPublicacion: "asc"
-                }
+                orderBy: {fechaPublicacion: "desc"}
             });
 
             return preguntas;
-
-        }catch(ex){
-            throw new BadRequestException("Error al obtener las preguntas"+ex);
+        } catch (error) {
+            throw new BadRequestException(`Error al obtener las preguntas: ${error}`);
         }
-    }
-
-    // Get questions by materia_tutor
-    async obtenerPreguntasInteresTutor(idTutor: number){
-        const preguntasInteresTutor = await this.prismaService.pregunta.findMany({
-            where: {
-                materia: {
-                    materia_tutor: {
-                        some: {
-                            idUsuario: idTutor
-                        }
-                    }
-                }
-            },
-            orderBy: {
-                fechaPublicacion: "desc"
-            }
-        });
-
-        return preguntasInteresTutor;
     }
 
     // Tutor envia oferta de solucion a la pregunta
@@ -216,7 +201,7 @@ export class UserService {
             });
     
             if(existOferta){
-               throw new BadRequestException("Ya se envio una oferta para esta pregunta"); 
+                throw new ConflictException("Ya se envió una oferta para esta pregunta");
             }
     
             const nvaOfertaPregunta = await this.prismaService.ofertaresolucion.create({
@@ -230,7 +215,10 @@ export class UserService {
             });
             return nvaOfertaPregunta;
         } catch (error) {
-            throw new BadRequestException("Error al enviar la oferta: "+error);
+            if (error instanceof ConflictException) {
+                throw error;
+            }
+            throw new BadRequestException("Ocurrió un error al enviar la oferta");
         }
     }
 

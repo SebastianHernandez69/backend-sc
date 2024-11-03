@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { Request } from 'express';
@@ -35,6 +35,12 @@ export class UserController {
   async getUserProfile(@Req() req: Request){
     const user = req.user as JwtPayload;
     return await this.userService.getUserProfile(user.sub, user.rol);
+  }
+
+  //Perfil de tutor-guest
+  @Get("/profile/view-only/:idTutor")
+  async getUserProfileGuest(@Param("idTutor") idTutor: string){
+    return await this.userService.getUserProfileTutor(parseInt(idTutor));
   }
 
   // Uptade uesr info
