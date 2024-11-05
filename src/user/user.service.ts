@@ -15,13 +15,13 @@ export class UserService {
     }
 
     // Agregar materias de interes al pupilo
-    async addMateriaToUser(idUsuario: number, idMateria: number, idRol: number){
+    async addMateriaToUser(idUsuario: number, idMateria: string, idRol: number){
 
         try{
             if(idRol === 2){
                 const interesPupilo = await this.prismaService.interes_pupilo.create({
                     data:{
-                        idMateria: idMateria,
+                        idMateria: parseInt(idMateria),
                         idUsuario: idUsuario
                     }
                 });
@@ -32,7 +32,7 @@ export class UserService {
             if(idRol === 1){
                 const interesTutor = await this.prismaService.materia_tutor.create({
                     data: {
-                        idMateria: idMateria,
+                        idMateria: parseInt(idMateria),
                         idUsuario: idUsuario
                     }
                 });

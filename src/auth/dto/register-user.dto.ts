@@ -4,13 +4,13 @@ export class RegisterUserDto {
     @IsString()
     primerNombre: string;
     @IsString()
-    segundoNombre: string;
+    segundoNombre?: string;
     @IsString()
     primerApellido: string;
     @IsString()
-    segundoApellido: string;
+    segundoApellido?: string;
   
-    idRol: number | null;
+    idRol: string | null;
     
     edad: number;
     @IsString()
@@ -22,12 +22,12 @@ export class RegisterUserDto {
     @IsString()
     telefono: string;
     @IsNumber()
-    valoracion: number;
+    valoracion?: number;
 
     foto_Perfil?: string;
 
-    horarioDiponibleInicio: string;
+    horarioDiponibleInicio?: string;
     
-    horarioDisponibleFin: string;
+    horarioDisponibleFin?: string;
   }
   

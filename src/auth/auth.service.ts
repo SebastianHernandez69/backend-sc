@@ -142,8 +142,8 @@ export class AuthService {
                 }
             });
 
-            const horaInicio = new Date(`2000-01-01T${registerUserDto.horarioDiponibleInicio}Z`);
-            const horaFin = new Date(`2000-01-01T${registerUserDto.horarioDisponibleFin}Z`);
+            const horaInicio = new Date(`1970-01-01T00:00:00.000Z`).toISOString();
+            const horaFin = new Date(`1970-01-01T00:00:00.000Z`).toISOString();
 
             // HASH
             const hashPass = await encrypt(registerUserDto.contrasenia);
@@ -155,17 +155,17 @@ export class AuthService {
             // DATOS DE USUARIO
             const user = await this.prismaService.usuario.create({
                 data: {
-                idRol: registerUserDto.idRol,
+                idRol: parseInt(registerUserDto.idRol),
                 idNombre: name.idNombre,
                 edad: registerUserDto.edad,
                 contrasenia: hashPass,
                 correo: correo,
                 dni: registerUserDto.dni,
-                valoracion: registerUserDto.valoracion,
+                valoracion: 5,
                 fotoPerfil: registerUserDto.foto_Perfil,
                 telefono: registerUserDto.telefono,
-                horarioDisponibleInicio: horaInicio.toISOString(),
-                horarioDisponibleFin: horaFin.toISOString(),
+                horarioDisponibleInicio: horaInicio,
+                horarioDisponibleFin: horaFin,
                 isverified: false,
                 verificationcode: verificationCode,
                 verificationexpiry: verificationExpiry

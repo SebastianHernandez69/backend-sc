@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { Request } from 'express';
@@ -13,6 +13,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('/materia-interes/add')
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   async addMateriaToUser(@Req() req: Request){
 
