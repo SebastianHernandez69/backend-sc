@@ -102,6 +102,7 @@ export class AuthService {
                 sub: user.idUsuario, 
                 username: user.idNombre,
                 rol: user.idRol,
+                profilePhoto: user.fotoPerfil
             }
 
             const access_token = await this.jwtService.signAsync(payload);
@@ -109,6 +110,7 @@ export class AuthService {
             return { access_token };
 
         } catch (error) {
+            console.log(error);
             throw new BadRequestException(error.message || 'Error al intentar iniciar sesión');
         }
     }
