@@ -39,7 +39,7 @@ export class S3Service {
             ContentType: file.mimetype
             })
         );
-
+        // agregar carpeta en s3
         return `https://${this.bucketName}.s3.${this.configService.get('AWS_REGION')}.amazonaws.com/${fileKey}`
     }
 

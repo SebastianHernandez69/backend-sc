@@ -7,6 +7,7 @@ import { PreguntaDto } from './dto/pregunta.dto';
 import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { AceptarOfertaDto } from './dto/aceptar-oferta.dto';
 
 @Controller('user')
 export class UserController {
@@ -78,5 +79,19 @@ export class UserController {
     const user = req.user as JwtPayload;
 
     return await this.userService.obtenerPreguntasInteresTutor(user.sub);
+  }
+  // Get questions with accepted offer
+   @Get("/pregunta/tutor/oferta-aceptada")
+   @UseGuards(JwtAuthGuard)
+   async obtenerPreguntasOfertaAceptada(@Req() req: Request){
+     const user = req.user as JwtPayload;
+
+     return await this.userService.obtenerPreguntasOfertaAceptada(user.sub, user.rol);
+  }
+
+  @Patch("/pregunta/aceptar-oferta")
+  @UseGuards(JwtAuthGuard)
+  async acceptOfferQuestion(@Body() aceptarOfertaDto: AceptarOfertaDto){
+    return this.userService.acceptOfferQuestion(aceptarOfertaDto);
   }
 }

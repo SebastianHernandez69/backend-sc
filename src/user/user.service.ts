@@ -6,6 +6,7 @@ import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { S3Service } from 'src/s3/s3.service';
 import { preguntaSelect } from './dto/pregunta-select';
+import { AceptarOfertaDto } from './dto/aceptar-oferta.dto';
 
 @Injectable()
 export class UserService {
@@ -155,7 +156,10 @@ export class UserService {
 
     // Método para obtener preguntas de un pupilo
     async obtenerPreguntasPupilo(idPupilo: number) {
-        return this.obtenerPreguntas({ idUsuarioPupilo: idPupilo });
+        return this.obtenerPreguntas({ 
+            idUsuarioPupilo: idPupilo, 
+            idEstadoPregunta: 1
+        });
     }
     
     // Método para obtener preguntas de interés para el tutor
@@ -168,8 +172,29 @@ export class UserService {
         }, idTutor);
     }
 
+    // Obtener preguntas aceptadas de usuario
+    async obtenerPreguntasOfertaAceptada(idUsuario: number, idRol: number){
+        if(idRol == 1) {
+            return this.obtenerPreguntas({
+                idEstadoPregunta: 2,
+                ofertaresolucion: {
+                    some: {
+                        idUsuarioTutor: idUsuario,
+                        idEstadoOferta: 3
+                    }
+                }
+            },idUsuario);
+        } 
+        else if (idRol == 2){
+            return this.obtenerPreguntas({
+                idUsuarioPupilo: idUsuario,
+                idEstadoPregunta: 2,
+            },null,idRol)
+        }
+    }
+
     // obtener preguntas general
-    async obtenerPreguntas(where: any, idTutor?: number){
+    async obtenerPreguntas(where: any, idTutor?: number, idRol?: number){
         try {
             const preguntas = await this.prismaService.pregunta.findMany({
                 where,
@@ -177,6 +202,10 @@ export class UserService {
                     ...preguntaSelect,
                     ...(idTutor && {ofertaresolucion:{
                         where: {idUsuarioTutor: idTutor},
+                        select: preguntaSelect.ofertaresolucion.select
+                    }}),
+                    ...(idRol && {ofertaresolucion:{
+                        where: {idEstadoOferta: 3},
                         select: preguntaSelect.ofertaresolucion.select
                     }})
                 },
@@ -188,6 +217,7 @@ export class UserService {
             throw new BadRequestException(`Error al obtener las preguntas: ${error}`);
         }
     }
+
 
     // Tutor envia oferta de solucion a la pregunta
     async sendOfertaSolucion(idTutor: number, ofertaPreguntaDto: OfertaPreguntaDto){
@@ -267,4 +297,35 @@ export class UserService {
 
     }
 
+    async acceptOfferQuestion(aceptarOfertaDto: AceptarOfertaDto){
+        const { idOferta } = aceptarOfertaDto;
+
+        try {
+            const updatedOfferState = await this.prismaService.ofertaresolucion.update({
+                where: {
+                    idOferta: idOferta
+                },
+                data: {
+                    idEstadoOferta: 3
+                }
+            });
+
+            if(!updatedOfferState){
+                throw new BadRequestException("La oferta no existe");
+            }
+
+            const updatedQuestionState = await this.prismaService.pregunta.update({
+                where: {
+                    idPregunta: updatedOfferState.idPregunta
+                },
+                data: {
+                    idEstadoPregunta: 2
+                }
+            });
+            
+            return updatedQuestionState;
+        } catch (error) {
+            throw new BadRequestException(`Error al actualizar el estado de la pregunta: ${error}`);
+        }
+    }
 }
