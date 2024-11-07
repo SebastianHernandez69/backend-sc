@@ -328,4 +328,26 @@ export class UserService {
             throw new BadRequestException(`Error al actualizar el estado de la pregunta: ${error}`);
         }
     }
+
+    async updateProfilePhoto(idUsuario: number, file: Express.Multer.File){
+        try {
+            const newUserImg = await this.s3Service.uploadFile(file);
+
+            const updateImgUser = this.prismaService.usuario.update({
+                where: {
+                    idUsuario: idUsuario,
+                },
+                data:{
+                    fotoPerfil: newUserImg,
+                }
+            });
+
+            if(updateImgUser){
+                return updateImgUser;
+            }
+
+        } catch (error) {
+            throw new BadRequestException(`Error al actualizar la imagen ${error}` );
+        }   
+    }
 }
