@@ -172,6 +172,7 @@ model usuario {
   isverified                                               Boolean
   verificationcode                                         String?            @db.VarChar(30)
   verificationexpiry                                       DateTime?          @db.Timestamptz(6)
+  isenabled                                                Boolean?
   comentario_comentario_idUsuarioComentaTousuario          comentario[]       @relation("comentario_idUsuarioComentaTousuario")
   comentario_comentario_idUsuarioRecibeComentarioTousuario comentario[]       @relation("comentario_idUsuarioRecibeComentarioTousuario")
   conocimiento                                             conocimiento[]
