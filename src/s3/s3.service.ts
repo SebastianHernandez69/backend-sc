@@ -19,8 +19,8 @@ export class S3Service {
         this.bucketName = this.configService.get('S3_BUCKET_NAME');
     }
 
-    async uploadFile(file: Express.Multer.File): Promise<string> {
-        const fileKey = `${uuid()}-${file.originalname}`;
+    async uploadFile(file: Express.Multer.File, folder: string): Promise<string> {
+        const fileKey = `${folder}/${uuid()}-${file.originalname}`;
 
         await this.s3Client.send(
             new PutObjectCommand({
@@ -31,14 +31,6 @@ export class S3Service {
             })
         );
 
-        await this.s3Client.send(
-        new PutObjectCommand({
-            Bucket: this.bucketName,
-            Key: fileKey,
-            Body: file.buffer,
-            ContentType: file.mimetype
-            })
-        );
         // agregar carpeta en s3
         return `https://${this.bucketName}.s3.${this.configService.get('AWS_REGION')}.amazonaws.com/${fileKey}`
     }

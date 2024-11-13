@@ -9,7 +9,7 @@ datasource db {
 
 model admin {
   idAdmin     Int    @id @default(autoincrement())
-  correo      String @db.VarChar(100)
+  correo      String @unique(map: "uq_correo_admin") @db.VarChar(100)
   contrasenia String @db.VarChar(255)
   idNombre    Int
   nombre      nombre @relation(fields: [idNombre], references: [idNombre], onDelete: NoAction, onUpdate: NoAction, map: "admin_idnombre_foreign")

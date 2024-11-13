@@ -68,7 +68,7 @@ export class UserService {
 
             if(files.length > 0 ){
                 const uploadImgs = files.map(async (file) => {
-                    const imgUrl = await this.s3Service.uploadFile(file);
+                    const imgUrl = await this.s3Service.uploadFile(file, "imgPreguntas");
                     await this.prismaService.imgpregunta.create({
                         data: {
                             idPregunta: pregunta.idPregunta,
@@ -331,7 +331,7 @@ export class UserService {
 
     async updateProfilePhoto(idUsuario: number, file: Express.Multer.File){
         try {
-            const newUserImg = await this.s3Service.uploadFile(file);
+            const newUserImg = await this.s3Service.uploadFile(file, "profiles-img");
 
             const updateImgUser = this.prismaService.usuario.update({
                 where: {
@@ -343,7 +343,10 @@ export class UserService {
             });
 
             if(updateImgUser){
-                return updateImgUser;
+                return {
+                    idUsuario: (await updateImgUser).idUsuario,
+                    fotoPerfil: (await updateImgUser).fotoPerfil
+                };
             }
 
         } catch (error) {

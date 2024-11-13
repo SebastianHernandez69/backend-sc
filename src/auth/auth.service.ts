@@ -10,6 +10,8 @@ import { addMinutes, sub } from 'date-fns';
 import { EmailService } from 'src/email/email.service';
 import { ResetPasswordDto } from './dto/reset-pass.dto';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/interfaces/user';
+
 
 @Injectable()
 export class AuthService {
@@ -75,43 +77,50 @@ export class AuthService {
 
 
     // Servicio para iniciar sesion
-    async login(loginUserDto: LoginUserDto){
-
-        const correo = loginUserDto.correo;
-        const password = loginUserDto.password;
-
+    async login(loginUserDto: LoginUserDto) {
+        const { correo, password } = loginUserDto;
+    
         try {
-            
-            const user = await this.prismaService.usuario.findUnique({
-                where: {
-                    correo
-                }
-            });
-
-            if(!user){
-                throw new BadRequestException('Correo o contraseña invalidos');
+            let user: User = await this.findAdmin(correo);
+            let isAdmin = !!user;
+    
+            if (!user) {
+                user = await this.prismaService.usuario.findUnique({ where: { correo } });
+                isAdmin = false;
             }
-
+    
+            if (!user) {
+                throw new BadRequestException('Correo o contraseña inválidos');
+            }
+    
             const isPassMatch = await compare(password, user.contrasenia);
-
-            if(!isPassMatch){
-                throw new BadRequestException('Correo o contraseña invalidos');
+            if (!isPassMatch) {
+                throw new BadRequestException('Correo o contraseña inválidos');
             }
-
-            const payload = {
-                sub: user.idUsuario, 
-                username: user.idNombre,
-                rol: user.idRol,
-                profilePhoto: user.fotoPerfil
-            }
-
+    
+            const payload = isAdmin
+                ? { sub: user.idAdmin, username: user.idNombre, rol: 3 }
+                : { sub: user.idUsuario, username: user.idNombre, rol: user.idRol, profilePhoto: user.fotoPerfil };
+    
             const access_token = await this.jwtService.signAsync(payload);
-
             return { access_token };
+        } catch (error) {
+            console.error(error);
+            throw new BadRequestException(error.message || 'Error al intentar iniciar sesión');
+        }
+    }
+    
+
+    async findAdmin(correo: string){
+        try {
+            const adminUser = await this.prismaService.admin.findUnique({
+                where: { correo: correo }
+            });
+            return adminUser;
 
         } catch (error) {
-            console.log(error);
-            throw new BadRequestException(error.message || 'Error al intentar iniciar sesión');
+            console.log(`Error al obtener admin ${error}`);
+            return null;
         }
     }
 
