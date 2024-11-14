@@ -9,10 +9,11 @@ import { UserModule } from './user/user.module';
 import { S3Module } from './s3/s3.module';
 import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
+import { SendBirdModule } from './send-bird/send-bird.module';
 
 @Module({
   imports: [AuthModule, PrismaModule, HomeModule, CategoriesModule, MateriaModule, UserModule, 
-    S3Module, ConfigModule.forRoot({isGlobal: true}), AdminModule],
+    S3Module, ConfigModule.forRoot({isGlobal: true}), AdminModule, SendBirdModule],
   controllers: [],
   providers: [EmailService],
 })
