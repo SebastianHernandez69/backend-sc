@@ -166,7 +166,7 @@ export class AuthService {
                 data: {
                     idRol: parseInt(idRol),
                     idNombre: name.idNombre,
-                    edad,
+                    edad: Number(edad),
                     contrasenia: hashPass,
                     correo,
                     dni,
@@ -177,7 +177,8 @@ export class AuthService {
                     horarioDisponibleFin: defaultTime,
                     isverified: false,
                     verificationcode: verificationCode,
-                    verificationexpiry: verificationExpiry
+                    verificationexpiry: verificationExpiry,
+                    isenabled: true
                 },
             });
     

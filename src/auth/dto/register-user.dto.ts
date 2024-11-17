@@ -12,9 +12,10 @@ export class RegisterUserDto {
   
     idRol: string | null;
     
-    edad: number;
+    edad: string;
     @IsString()
     contrasenia: string;
+    confirmarContrasenia: string;
     @IsString()
     correo: string;
     @IsString()
@@ -22,9 +23,6 @@ export class RegisterUserDto {
     @IsString()
     telefono: string;
     @IsNumber()
-    valoracion?: number;
-
-    foto_Perfil?: string;
 
     horarioDiponibleInicio?: string;
     
