@@ -11,13 +11,17 @@ import { EmailService } from 'src/email/email.service';
 import { ResetPasswordDto } from './dto/reset-pass.dto';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/interfaces/user';
+import { S3Service } from 'src/s3/s3.service';
+import { StreamchatService } from 'src/streamchat/streamchat.service';
 
 
 @Injectable()
 export class AuthService {
 
     constructor(private prismaService: PrismaService, private emailService: EmailService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private readonly s3Service: S3Service,
+        private readonly streamchatService: StreamchatService
     ){}
 
     //
@@ -97,10 +101,16 @@ export class AuthService {
             if (!isPassMatch) {
                 throw new BadRequestException('Correo o contraseña inválidos');
             }
-    
+
+            let scToken: string | null;
+            // Generar token de streamchat
+            if(!isAdmin){
+                scToken = await this.streamchatService.generateToken(user.idUsuario.toString());
+            }
+
             const payload = isAdmin
                 ? { sub: user.idAdmin, username: user.idNombre, rol: 3 }
-                : { sub: user.idUsuario, username: user.idNombre, rol: user.idRol, profilePhoto: user.fotoPerfil };
+                : { sub: user.idUsuario, username: user.idNombre, rol: user.idRol, profilePhoto: user.fotoPerfil, scToken: scToken};
     
             const access_token = await this.jwtService.signAsync(payload);
             return { access_token };
@@ -110,7 +120,7 @@ export class AuthService {
         }
     }
     
-
+    
     async findAdmin(correo: string){
         try {
             const adminUser = await this.prismaService.admin.findUnique({
@@ -129,12 +139,11 @@ export class AuthService {
     }
 
     // Servicio para registrar un usuario
-    async signUp(registerUserDto: RegisterUserDto){
+    async signUp(registerUserDto: RegisterUserDto, file?: Express.Multer.File){
 
         try {
 
             const correo = registerUserDto.correo;
-
             const emailFound = await this.prismaService.usuario.findUnique({
                 where: {
                     correo
@@ -164,6 +173,12 @@ export class AuthService {
             const verificationExpiry = addMinutes(new Date(), 15).toISOString();;
 
             // DATOS DE USUARIO
+            // url profile-photo
+            let userProfilePhoto = "https://sharkcat-bucket.s3.us-east-2.amazonaws.com/profiles-img/defaul-user-profile.png";
+            if(file){
+                userProfilePhoto = await this.s3Service.uploadFile(file, "profiles-img");
+            }
+
             const user = await this.prismaService.usuario.create({
                 data: {
                 idRol: parseInt(registerUserDto.idRol),
@@ -173,7 +188,7 @@ export class AuthService {
                 correo: correo,
                 dni: registerUserDto.dni,
                 valoracion: 5,
-                fotoPerfil: registerUserDto.foto_Perfil,
+                fotoPerfil: userProfilePhoto,
                 telefono: registerUserDto.telefono,
                 horarioDisponibleInicio: horaInicio,
                 horarioDisponibleFin: horaFin,
@@ -182,6 +197,12 @@ export class AuthService {
                 verificationexpiry: verificationExpiry
                 },
             });
+
+            await this.streamchatService.createUser(
+                user.idUsuario.toString(),
+                `${name.primerNombre} ${name.primerApellido}`,
+                user.fotoPerfil
+            );
 
             await this.emailService.sendVerificationEmail(correo, verificationCode);
 

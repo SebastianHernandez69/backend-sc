@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, HttpCode, UseGuards, Req  } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, HttpCode, UseGuards, Req, UseInterceptors, UploadedFile  } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -8,6 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { Request } from 'express';
 import { JwtPayload } from 'src/interfaces/JwtPayload';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
@@ -22,8 +23,9 @@ export class AuthController {
 
     @Post('/sign-up')
     @HttpCode(200)
-    signup(@Body() registerUserDto: RegisterUserDto){
-        return this.authService.signUp(registerUserDto);
+    @UseInterceptors(FileInterceptor('file'))
+    signup(@Body() registerUserDto: RegisterUserDto,@UploadedFile() file?: Express.Multer.File){
+        return this.authService.signUp(registerUserDto,file || null);
     }
 
     @Patch('/pass-update')

@@ -8,6 +8,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { S3Module } from 'src/s3/s3.module';
+import { StreamchatModule } from 'src/streamchat/streamchat.module';
 
 @Module({
   providers: [AuthService,EmailService,LocalStrategy,JwtStrategy],
@@ -16,6 +18,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       PassportModule,
       ConfigModule.forRoot({ isGlobal: true }), 
       PrismaModule,
+      S3Module,
+      StreamchatModule,
       JwtModule.registerAsync({
         imports: [ConfigModule], 
         inject: [ConfigService], 
