@@ -13,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/interfaces/user';
 import { S3Service } from 'src/s3/s3.service';
 import { StreamchatService } from 'src/streamchat/streamchat.service';
+import { CreateAdminDto } from './dto/create-admin.dto';
 
 
 @Injectable()
@@ -139,87 +140,110 @@ export class AuthService {
     }
 
     // Servicio para registrar un usuario
-    async signUp(registerUserDto: RegisterUserDto, file?: Express.Multer.File){
-
+    async signUp(registerUserDto: RegisterUserDto, file?: Express.Multer.File) {
         try {
-
-            const correo = registerUserDto.correo;
-            const emailFound = await this.prismaService.usuario.findUnique({
-                where: {
-                    correo
-                }
-            });
-
-            if(emailFound) throw new BadRequestException("El correo ya esta en uso");
-
-            //  GUARDAR NOMBRES DEL USUARIO
+            const { correo, contrasenia, idRol, primerNombre, segundoNombre, primerApellido, segundoApellido, edad, dni, telefono } = registerUserDto;
+    
+            const emailFound = await this.prismaService.usuario.findUnique({ where: { correo } });
+            if (emailFound) throw new BadRequestException("El correo ya está en uso");
+    
             const name = await this.prismaService.nombre.create({
-                data: {
-                    primerNombre: registerUserDto.primerNombre,
-                    segundoNombre: registerUserDto.segundoNombre,
-                    primerApellido: registerUserDto.primerApellido,
-                    segundoApellido: registerUserDto.segundoApellido   
-                }
+                data: { primerNombre, segundoNombre, primerApellido, segundoApellido }
             });
-
-            const horaInicio = new Date(`1970-01-01T00:00:00.000Z`).toISOString();
-            const horaFin = new Date(`1970-01-01T00:00:00.000Z`).toISOString();
-
-            // HASH
-            const hashPass = await encrypt(registerUserDto.contrasenia);
-
+    
+            const defaultTime = new Date(`1970-01-01T00:00:00.000Z`).toISOString();
+    
+            const hashPass = await encrypt(contrasenia);
+    
             const verificationCode = this.generateVerificationCode();
-
-            const verificationExpiry = addMinutes(new Date(), 15).toISOString();;
-
-            // DATOS DE USUARIO
-            // url profile-photo
-            let userProfilePhoto = "https://sharkcat-bucket.s3.us-east-2.amazonaws.com/profiles-img/defaul-user-profile.png";
-            if(file){
-                userProfilePhoto = await this.s3Service.uploadFile(file, "profiles-img");
-            }
-
+            const verificationExpiry = addMinutes(new Date(), 15).toISOString();
+    
+            const userProfilePhoto = file
+                ? await this.s3Service.uploadFile(file, "profiles-img")
+                : "https://sharkcat-bucket.s3.us-east-2.amazonaws.com/profiles-img/defaul-user-profile.png";
+    
             const user = await this.prismaService.usuario.create({
                 data: {
-                idRol: parseInt(registerUserDto.idRol),
-                idNombre: name.idNombre,
-                edad: registerUserDto.edad,
-                contrasenia: hashPass,
-                correo: correo,
-                dni: registerUserDto.dni,
-                valoracion: 5,
-                fotoPerfil: userProfilePhoto,
-                telefono: registerUserDto.telefono,
-                horarioDisponibleInicio: horaInicio,
-                horarioDisponibleFin: horaFin,
-                isverified: false,
-                verificationcode: verificationCode,
-                verificationexpiry: verificationExpiry
+                    idRol: parseInt(idRol),
+                    idNombre: name.idNombre,
+                    edad,
+                    contrasenia: hashPass,
+                    correo,
+                    dni,
+                    valoracion: 5,
+                    fotoPerfil: userProfilePhoto,
+                    telefono,
+                    horarioDisponibleInicio: defaultTime,
+                    horarioDisponibleFin: defaultTime,
+                    isverified: false,
+                    verificationcode: verificationCode,
+                    verificationexpiry: verificationExpiry
                 },
             });
-
+    
             await this.streamchatService.createUser(
                 user.idUsuario.toString(),
                 `${name.primerNombre} ${name.primerApellido}`,
                 user.fotoPerfil
             );
-
+    
             await this.emailService.sendVerificationEmail(correo, verificationCode);
-
+    
             const { contrasenia: _, ...userPassless } = user;
-
             return userPassless;
-
         } catch (error) {
-            if(error instanceof BadRequestException) {
+            if (error instanceof BadRequestException) {
                 throw error;
             }
             throw new Error(error);
         }
+    }
+    
+    // Create admin user
+    async createAdmin(createAdminDto: CreateAdminDto){
+        try {
 
+            const emailFound = await this.prismaService.admin.findUnique({
+                where:{
+                    correo: createAdminDto.correo
+                }
+            })
+
+            if(emailFound){
+                throw new BadRequestException("El correo ya esta en uso");
+            }
+
+            const name = await this.prismaService.nombre.create({
+                data: {
+                    primerNombre: createAdminDto.primerNombre,
+                    segundoNombre: createAdminDto.segundoNombre,
+                    primerApellido: createAdminDto.primerApellido,
+                    segundoApellido: createAdminDto.segundoApellido   
+                }
+            });
+
+            // HASH
+            const hashPass = await encrypt(createAdminDto.contrasenia);
+
+            const admin = await this.prismaService.admin.create({
+                data:{
+                    correo: createAdminDto.correo,
+                    contrasenia: hashPass,
+                    idNombre: name.idNombre
+                }
+            });
+
+            const {contrasenia: _, ...adminPassless} = admin;
+
+            return adminPassless;
+
+        } catch (error) {
+            throw new BadRequestException(`Error al crear admin: ${error}`);
+        }
     }
 
-    // Servicio para cambiar contrasena
+
+    // change password
     async updatePassword(id: number, updatePassword: UpdatePasswordDto){
         try {
             
@@ -239,7 +263,7 @@ export class AuthService {
 
             const newHashPassword = await encrypt(newPassword);
 
-            // Actualizar contrasena
+            // Update password
             await this.prismaService.usuario.update({
                 where: { idUsuario: id },
                 data: { contrasenia: newHashPassword }
@@ -257,7 +281,7 @@ export class AuthService {
         
         const user = await this.validateVerificationCode(code);
 
-        // Marcar como verificado y eliminar codigo
+        // 
         await this.prismaService.usuario.update({
             where: {idUsuario: user.idUsuario},
             data: {
@@ -315,7 +339,7 @@ export class AuthService {
         });
     }
 
-    // Generar un código aleatorio de 6 dígitos
+    // Generate random code
   private generateVerificationCode(): string {
     return crypto.randomInt(100000, 999999).toString();
   }
