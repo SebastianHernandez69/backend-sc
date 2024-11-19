@@ -35,10 +35,17 @@ export class UserService {
                     data: {
                         idMateria: parseInt(idMateria),
                         idUsuario: idUsuario
+                    },
+                    select: {
+                        materia:{
+                            select: {
+                                materia: true
+                            }
+                        }
                     }
                 });
 
-                return interesTutor;
+                return {materia: interesTutor.materia.materia};
             }
 
         }catch(error){

@@ -58,4 +58,26 @@ export class MateriaService {
             throw new BadRequestException(`Error al crear la materia para la categoria: ${materiaDto.idCategoria}, error: ${error.message}`);
         }
     }
+
+    // Get 
+    async getMateriaInteresTutor(IdTutor: number){
+        try {
+            const materias = await this.prismaService.materia_tutor.findMany({
+                where: {
+                    idUsuario: IdTutor
+                },
+                select:{
+                    materia: {
+                        select: {
+                            materia: true
+                        }
+                    }
+                }
+            });
+
+            return {materias: materias.map(materia => materia.materia.materia)};
+        } catch (error) {
+            throw new BadRequestException(`Error al obtener las materias del tutor: ${error}`);
+        }
+    }
 }
