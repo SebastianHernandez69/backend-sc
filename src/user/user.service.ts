@@ -344,7 +344,6 @@ export class UserService {
 
             if(updateImgUser){
                 return {
-                    idUsuario: (await updateImgUser).idUsuario,
                     fotoPerfil: (await updateImgUser).fotoPerfil
                 };
             }
