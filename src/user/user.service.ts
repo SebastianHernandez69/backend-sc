@@ -8,11 +8,12 @@ import { preguntaSelect } from './dto/pregunta-select';
 import { AceptarOfertaDto } from './dto/aceptar-oferta.dto';
 import { ExperienciaDto } from './dto/experiencia.dto';
 import { ConocimientoDto } from './dto/conocimiento.dto';
+import { OfferNotificationGateway } from 'src/offer-notification/offer-notification.gateway';
 
 @Injectable()
 export class UserService {
 
-    constructor(private prismaService: PrismaService, private readonly s3Service: S3Service){
+    constructor(private prismaService: PrismaService, private readonly s3Service: S3Service, private ofertaNotiGateway: OfferNotificationGateway){
 
     }
 
@@ -249,8 +250,19 @@ export class UserService {
                     idEstadoOferta: 1,
                     descripcion: ofertaPreguntaDto.descripcion,
                     fechaOferta: new Date()
+                },
+                include: {
+                    pregunta: true
                 }
             });
+
+            const idPupilo = nvaOfertaPregunta.pregunta.idUsuarioPupilo;
+            if (!idPupilo) {
+                throw new BadRequestException("No se pudo encontrar el pupilo asociado a la pregunta.");
+            }
+            
+            this.ofertaNotiGateway.sendNewOfferNotification(idPupilo,nvaOfertaPregunta.idOferta);
+
             return nvaOfertaPregunta;
         } catch (error) {
             if (error instanceof ConflictException) {
@@ -331,6 +343,8 @@ export class UserService {
                 }
             });
             
+            this.ofertaNotiGateway.sendStateChangeQuestion(updatedOfferState.idPregunta, updatedOfferState.idOferta);
+
             return updatedQuestionState;
         } catch (error) {
             throw new BadRequestException(`Error al actualizar el estado de la pregunta: ${error}`);
@@ -406,7 +420,7 @@ export class UserService {
     }
 
     // add conocimiento
-    async addConocimiento(conocimientoDto: ConocimientoDto, idUsuario){
+    async addConocimiento(conocimientoDto: ConocimientoDto, idUsuario: number){
         const { idInstitucion, tituloAcademico, fechaEgreso } = conocimientoDto;
  
         try {

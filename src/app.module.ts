@@ -10,11 +10,12 @@ import { S3Module } from './s3/s3.module';
 import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
 import { StreamchatModule } from './streamchat/streamchat.module';
+import { OfferNotificationGateway } from './offer-notification/offer-notification.gateway';
 
 @Module({
   imports: [AuthModule, PrismaModule, HomeModule, CategoriesModule, MateriaModule, UserModule, 
     S3Module, ConfigModule.forRoot({isGlobal: true}), AdminModule, StreamchatModule],
   controllers: [],
-  providers: [EmailService],
+  providers: [EmailService, OfferNotificationGateway],
 })
 export class AppModule {}
