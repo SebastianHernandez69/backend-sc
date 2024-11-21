@@ -8,6 +8,8 @@ import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { AceptarOfertaDto } from './dto/aceptar-oferta.dto';
+import { ExperienciaDto } from './dto/experiencia.dto';
+import { ConocimientoDto } from './dto/conocimiento.dto';
 
 @Controller('user')
 export class UserController {
@@ -103,4 +105,37 @@ export class UserController {
 
     return this.userService.updateProfilePhoto(user.sub, file);
   }
+
+  @Post("/experiencia/add")
+  @UseGuards(JwtAuthGuard)
+  async addWorkExperience(@Body() experienciaDto :ExperienciaDto, @Req() req: Request){
+    const user = req.user as JwtPayload;
+
+    return await this.userService.addWorkExperience(experienciaDto, user.sub);
+  }
+
+  @Get("/experiencia")
+  @UseGuards(JwtAuthGuard)
+  async getWorkExperience(@Req() req: Request){
+    const user = req.user as JwtPayload;
+
+    return await this.userService.getWorkExperience(user.sub);
+  }
+
+  @Get("/conocimiento")
+  @UseGuards(JwtAuthGuard)
+  async getConocimientoById(@Req() req: Request){
+    const user = req.user as JwtPayload;
+
+    return await this.userService.getConocimientoById(user.sub);
+  }
+
+  @Post("/conocimiento/add")
+  @UseGuards(JwtAuthGuard)
+  async addConocimiento(@Body() conocimientoDto :ConocimientoDto, @Req() req: Request){
+    const user = req.user as JwtPayload;
+
+    return await this.userService.addConocimiento(conocimientoDto, user.sub);
+  }
+
 }

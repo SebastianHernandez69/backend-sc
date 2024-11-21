@@ -111,7 +111,7 @@ export class AuthService {
 
             const payload = isAdmin
                 ? { sub: user.idAdmin, username: user.idNombre, rol: 3 }
-                : { sub: user.idUsuario, username: user.idNombre, rol: user.idRol, profilePhoto: user.fotoPerfil, scToken: scToken};
+                : { sub: user.idUsuario, isEnabled: user.isenabled, rol: user.idRol, scToken: scToken};
     
             const access_token = await this.jwtService.signAsync(payload);
             return { access_token };

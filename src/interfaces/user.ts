@@ -15,4 +15,5 @@ export interface User{
    isverified?: boolean;
    verificationcode?: string;
    verificationexpiry?: Date;
+   isenabled?: boolean;
 }

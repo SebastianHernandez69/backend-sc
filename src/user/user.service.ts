@@ -1,12 +1,13 @@
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PreguntaDto } from './dto/pregunta.dto';
-import { format } from 'date-fns';
 import { OfertaPreguntaDto } from './dto/oferta-pregunta.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { S3Service } from 'src/s3/s3.service';
 import { preguntaSelect } from './dto/pregunta-select';
 import { AceptarOfertaDto } from './dto/aceptar-oferta.dto';
+import { ExperienciaDto } from './dto/experiencia.dto';
+import { ConocimientoDto } from './dto/conocimiento.dto';
 
 @Injectable()
 export class UserService {
@@ -358,5 +359,91 @@ export class UserService {
         } catch (error) {
             throw new BadRequestException(`Error al actualizar la imagen ${error}` );
         }   
+    }
+
+    // Add work experience
+    async addWorkExperience(experienciaDto: ExperienciaDto, idUsuario: number){
+        const {idPuesto, empresa, fechaInicio, fechaFin, descripcion} = experienciaDto;
+        try {
+            const newExperiencia = await this.prismaService.experiencia.create({
+                data:{
+                    idUsuario,
+                    idPuesto: Number(idPuesto),
+                    empresa,
+                    fechaInicio,
+                    fechaFin,
+                    descripcion
+                }
+            });
+
+            if(!newExperiencia){
+                throw new BadRequestException("Error al crear experiencia");
+            }
+
+            return newExperiencia;
+        } catch (error) {
+            throw new BadRequestException(`Error al crear una experiencia: ${error}`);
+        }
+    }
+
+    // get work experience by id
+    async getWorkExperience(idUsuario: number){
+        try {
+            const experience = await this.prismaService.experiencia.findMany({
+                where: {
+                    idUsuario: idUsuario
+                },
+                include: {
+                    puesto: true
+                }
+            });
+            
+
+            return experience;
+        } catch (error) {
+            throw new BadRequestException(`Error al obtener experiecia: ${error}`);
+        }
+    }
+
+    // add conocimiento
+    async addConocimiento(conocimientoDto: ConocimientoDto, idUsuario){
+        const { idInstitucion, tituloAcademico, fechaEgreso } = conocimientoDto;
+ 
+        try {
+            const newConocimiento = await this.prismaService.conocimiento.create({
+                data: {
+                    idUsuario,
+                    idInstitucion: Number(idInstitucion),
+                    tituloAcademico,
+                    fechaEgreso
+                }
+            });
+
+            if(!newConocimiento){
+                throw new BadRequestException("Error al crear un nuevo conocimiento");
+            }
+
+            return newConocimiento;
+        } catch (error) {
+            throw new BadRequestException(`Error al crear conocimiento: ${error}`);
+        }
+    }
+
+    // get conocimiento by id
+    async getConocimientoById(idUsuario: number){
+        try {
+            const conocimientos = await this.prismaService.conocimiento.findMany({
+                where: {
+                    idUsuario
+                },
+                include: {
+                    institucion: true
+                }
+            });
+
+            return conocimientos;
+        } catch (error) {
+            throw new BadRequestException(`Error al obtener conocimientos del usuario: ${error}`);
+        }
     }
 }
