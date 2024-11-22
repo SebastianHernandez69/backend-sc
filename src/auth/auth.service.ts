@@ -1,4 +1,4 @@
-import { applyDecorators, BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { encrypt } from 'src/libs/bcrypt';
@@ -6,7 +6,7 @@ import { compare } from 'bcrypt';
 import * as crypto from 'crypto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdatePasswordDto } from './dto/update-pass.dto';
-import { addMinutes, sub } from 'date-fns';
+import { addMinutes} from 'date-fns';
 import { EmailService } from 'src/email/email.service';
 import { ResetPasswordDto } from './dto/reset-pass.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -297,28 +297,35 @@ export class AuthService {
 
     // Request password reset code
     async requestPasswordReset(correo: string): Promise<void>{
-        const user = await this.prismaService.usuario.findUnique({
-            where: {correo}
-        });
-
-        if(!user){
-            throw new BadRequestException('Usuario no encontrado');
-        }
-
-        const verificationCode = this.generateVerificationCode();
-        const verificationExpiry = addMinutes(new Date(), 15);
-
-        await this.prismaService.usuario.update({
-            where:{
-                idUsuario: user.idUsuario
-            },
-            data:{
-                verificationcode: verificationCode,
-                verificationexpiry: verificationExpiry
+        try {
+            const user = await this.prismaService.usuario.findUnique({
+                where: {correo}
+            });
+    
+            if (!user) {
+                throw new NotFoundException('Usuario no encontrado');
             }
-        });
-
-        await this.emailService.sendResetPassEmail(correo, verificationCode);
+    
+            const verificationCode = this.generateVerificationCode();
+            const verificationExpiry = addMinutes(new Date(), 15);
+    
+            await this.prismaService.usuario.update({
+                where:{
+                    idUsuario: user.idUsuario
+                },
+                data:{
+                    verificationcode: verificationCode,
+                    verificationexpiry: verificationExpiry
+                }
+            });
+    
+            await this.emailService.sendResetPassEmail(correo, verificationCode);
+        } catch (error) {
+            if(error instanceof NotFoundException){
+                throw new NotFoundException('Usuario no encontrado');
+            }
+            throw new BadRequestException(`Error al enviar codigo de reseteo de contrasena: ${error}`);
+        }
         
     }
 
