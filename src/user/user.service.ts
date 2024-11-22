@@ -65,12 +65,10 @@ export class UserService {
             const pregunta = await this.prismaService.pregunta.create({
                 data: {
                     idMateria: parseInt(preguntaDto.idMateria),
-                    // idMateria: preguntaDto.idMateria,
                     idUsuarioPupilo: idUsuario,
                     titulo: preguntaDto.titulo,
                     descripcion: preguntaDto.descripcion,
                     idEstadoPregunta: parseInt(preguntaDto.idEstadoPregunta),
-                    // idEstadoPregunta: preguntaDto.idEstadoPregunta,
                     fechaPublicacion: now
                 }
             });
@@ -89,6 +87,8 @@ export class UserService {
                 await Promise.all(uploadImgs);
             }
 
+            this.ofertaNotiGateway.sendNewQuestionNotification(pregunta.idPregunta);
+            
             return pregunta;
         }catch(error){
             throw new BadRequestException("Error al crear pregunta: "+error);

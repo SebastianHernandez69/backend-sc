@@ -51,7 +51,27 @@ export class OfferNotificationGateway {
     const clientsInRoom = this.server.sockets.adapter.rooms.get(roomName);
     console.log(`Clientes en la sala ${roomName}:`, clientsInRoom);
 
-    this.server.in(roomName).emit('questionStateUpdate', {idPregunta, idOferta});
+    this.server.to(roomName).emit('questionStateUpdate', {idPregunta, idOferta});
     console.log(`Oferta: ${idOferta} aceptada de la pregunta: ${idPregunta}`);
+  }
+
+  // create question
+  @SubscribeMessage('joinNewQuestion')
+  handleJoinNewQuestion(@ConnectedSocket() client: Socket){
+    const roomName = 'newQuestionRoom';
+
+    if(client.rooms.has(roomName)){
+      return
+    }
+
+    client.join(roomName);
+    console.log(`Usuario tutor se a unido a la room ${roomName}`);
+  }
+
+  sendNewQuestionNotification(idPregunta: number){
+    const roomName = 'newQuestionRoom';
+
+    this.server.to(roomName).emit('newQuestionNotification', {idPregunta});
+    console.log(`Nueva pregunta con id: ${idPregunta} creada`);
   }
 }

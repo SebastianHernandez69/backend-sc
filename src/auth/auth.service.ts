@@ -110,7 +110,7 @@ export class AuthService {
             }
 
             const payload = isAdmin
-                ? { sub: user.idAdmin, username: user.idNombre, rol: 3 }
+                ? { sub: user.idAdmin, username: user.idNombre, rol: 3, isEnabled: true }
                 : { sub: user.idUsuario, isEnabled: user.isenabled, rol: user.idRol, scToken: scToken};
     
             const access_token = await this.jwtService.signAsync(payload);
