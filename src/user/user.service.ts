@@ -9,12 +9,17 @@ import { AceptarOfertaDto } from './dto/aceptar-oferta.dto';
 import { ExperienciaDto } from './dto/experiencia.dto';
 import { ConocimientoDto } from './dto/conocimiento.dto';
 import { OfferNotificationGateway } from 'src/offer-notification/offer-notification.gateway';
+import { StreamchatService } from 'src/streamchat/streamchat.service';
 
 @Injectable()
 export class UserService {
 
-    constructor(private prismaService: PrismaService, private readonly s3Service: S3Service, private ofertaNotiGateway: OfferNotificationGateway){
-
+    constructor(
+        private prismaService: PrismaService, 
+        private readonly s3Service: S3Service, 
+        private ofertaNotiGateway: OfferNotificationGateway,
+        private streamchatService: StreamchatService
+    ){
     }
 
     // Agregar materias de interes al pupilo
@@ -33,6 +38,17 @@ export class UserService {
             }
             
             if(idRol === 1){
+                const materiaTutor = await this.prismaService.materia_tutor.findFirst({
+                    where: {
+                        idUsuario,
+                        idMateria: Number(idMateria)
+                    }
+                });
+
+                if(materiaTutor){
+                    throw new ConflictException(`Materia ya agregada a tu lista de materias`);
+                }
+
                 const interesTutor = await this.prismaService.materia_tutor.create({
                     data: {
                         idMateria: parseInt(idMateria),
@@ -51,6 +67,9 @@ export class UserService {
             }
 
         }catch(error){
+            if(error instanceof ConflictException){
+                throw new ConflictException(`Materia ya agregada: ${error}`);
+            }
             throw new BadRequestException("Error al ingresar materia interes usuario: "+error);
         }
     }
@@ -365,6 +384,7 @@ export class UserService {
             });
 
             if(updateImgUser){
+                await this.streamchatService.updateProfilePhoto(String(idUsuario), (await updateImgUser).fotoPerfil);
                 return {
                     fotoPerfil: (await updateImgUser).fotoPerfil
                 };

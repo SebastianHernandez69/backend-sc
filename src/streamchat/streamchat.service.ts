@@ -71,4 +71,25 @@ export class StreamchatService {
             throw new BadRequestException(`Error al crear chat: ${error}`);
         }
     }
+
+    //
+    async updateProfilePhoto(userId: string, newProfilePhoto: string){
+
+        const update = {
+            id: userId,
+            set: {
+                image: newProfilePhoto
+            }
+        }
+
+        try {
+            const res = await this.client.partialUpdateUser(update);
+            if(!res){
+                throw new Error(`Error al actualizar foto`);
+            }
+
+        } catch (error) {
+            throw new Error(`Error al actualizar la foto de streamchat: ${error}`);
+        }
+    }
 }
