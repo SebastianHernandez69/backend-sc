@@ -10,6 +10,7 @@ import { ExperienciaDto } from './dto/experiencia.dto';
 import { ConocimientoDto } from './dto/conocimiento.dto';
 import { OfferNotificationGateway } from 'src/offer-notification/offer-notification.gateway';
 import { StreamchatService } from 'src/streamchat/streamchat.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,8 @@ export class UserService {
         private prismaService: PrismaService, 
         private readonly s3Service: S3Service, 
         private ofertaNotiGateway: OfferNotificationGateway,
-        private streamchatService: StreamchatService
+        private streamchatService: StreamchatService,
+        private cloudinaryService: CloudinaryService
     ){
     }
 
@@ -94,7 +96,8 @@ export class UserService {
 
             if(files.length > 0 ){
                 const uploadImgs = files.map(async (file) => {
-                    const imgUrl = await this.s3Service.uploadFile(file, "imgPreguntas");
+                    // const imgUrl = await this.s3Service.uploadFile(file, "imgPreguntas");
+                    const imgUrl = await this.cloudinaryService.uploadFile(file, "imgPreguntas");
                     await this.prismaService.imgpregunta.create({
                         data: {
                             idPregunta: pregunta.idPregunta,
@@ -372,7 +375,8 @@ export class UserService {
 
     async updateProfilePhoto(idUsuario: number, file: Express.Multer.File){
         try {
-            const newUserImg = await this.s3Service.uploadFile(file, "profiles-img");
+            // const newUserImg = await this.s3Service.uploadFile(file, "profiles-img");
+            const newUserImg = await this.cloudinaryService.uploadFile(file, "profiles-img");
 
             const updateImgUser = this.prismaService.usuario.update({
                 where: {

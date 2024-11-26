@@ -14,6 +14,7 @@ import { User } from 'src/interfaces/user';
 import { S3Service } from 'src/s3/s3.service';
 import { StreamchatService } from 'src/streamchat/streamchat.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 
 @Injectable()
@@ -22,7 +23,8 @@ export class AuthService {
     constructor(private prismaService: PrismaService, private emailService: EmailService,
         private jwtService: JwtService,
         private readonly s3Service: S3Service,
-        private readonly streamchatService: StreamchatService
+        private readonly streamchatService: StreamchatService,
+        private readonly cloudinaryService: CloudinaryService
     ){}
 
     //
@@ -159,7 +161,8 @@ export class AuthService {
             const verificationExpiry = addMinutes(new Date(), 15).toISOString();
     
             const userProfilePhoto = file
-                ? await this.s3Service.uploadFile(file, "profiles-img")
+            // ? await this.s3Service.uploadFile(file, "profiles-img")
+                ? await this.cloudinaryService.uploadFile(file, "profiles-img")
                 : "https://sharkcat-bucket.s3.us-east-2.amazonaws.com/profiles-img/defaul-user-profile.png";
     
             const user = await this.prismaService.usuario.create({

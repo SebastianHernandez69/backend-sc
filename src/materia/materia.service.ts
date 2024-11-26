@@ -3,10 +3,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoriaDto } from './dto/categoria-dto';
 import { S3Service } from 'src/s3/s3.service';
 import { MateriaDto } from './dto/materia-dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class MateriaService {
-    constructor(private prismaService: PrismaService, private readonly s3Service: S3Service){
+    constructor(
+        private prismaService: PrismaService, 
+        private readonly s3Service: S3Service,
+        private readonly cloudinaryService: CloudinaryService
+    ){
 
     }
 
@@ -19,7 +24,8 @@ export class MateriaService {
 
             if(file){
                 // Upload category img and get link
-                urlImgCategory = await this.s3Service.uploadFile(file,"categorias");
+                urlImgCategory = await this.cloudinaryService.uploadFile(file, "categorias");
+                // urlImgCategory = await this.s3Service.uploadFile(file,"categorias");
             }
 
             const newCategory = await this.prismaService.categoria.create({
@@ -42,7 +48,8 @@ export class MateriaService {
             let urlImgMateria: string | null = null;
 
             if(file){
-                urlImgMateria = await this.s3Service.uploadFile(file, "materias");
+                urlImgMateria = await this.cloudinaryService.uploadFile(file, "materias");
+                // urlImgMateria = await this.s3Service.uploadFile(file, "materias");
             }
 
             const newMateria = await this.prismaService.materia.create({

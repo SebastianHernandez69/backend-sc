@@ -10,6 +10,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { S3Module } from 'src/s3/s3.module';
 import { StreamchatModule } from 'src/streamchat/streamchat.module';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
   providers: [AuthService,EmailService,LocalStrategy,JwtStrategy],
@@ -20,6 +21,7 @@ import { StreamchatModule } from 'src/streamchat/streamchat.module';
       PrismaModule,
       S3Module,
       StreamchatModule,
+      CloudinaryModule,
       JwtModule.registerAsync({
         imports: [ConfigModule], 
         inject: [ConfigService], 

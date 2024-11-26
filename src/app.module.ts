@@ -11,11 +11,13 @@ import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
 import { StreamchatModule } from './streamchat/streamchat.module';
 import { OfferNotificationGateway } from './offer-notification/offer-notification.gateway';
+import { AcceptedQuestionGateway } from './accepted-question/accepted-question.gateway';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [AuthModule, PrismaModule, HomeModule, CategoriesModule, MateriaModule, UserModule, 
-    S3Module, ConfigModule.forRoot({isGlobal: true}), AdminModule, StreamchatModule],
+    S3Module, ConfigModule.forRoot({isGlobal: true}), AdminModule, StreamchatModule, CloudinaryModule],
   controllers: [],
-  providers: [EmailService, OfferNotificationGateway],
+  providers: [EmailService, OfferNotificationGateway, AcceptedQuestionGateway],
 })
 export class AppModule {}
