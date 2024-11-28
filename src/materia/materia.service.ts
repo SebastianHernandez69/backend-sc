@@ -87,4 +87,21 @@ export class MateriaService {
             throw new BadRequestException(`Error al obtener las materias del tutor: ${error}`);
         }
     }
+
+    // delete
+    async removeMateriaInteresTutor(idTutor: number, idMateria: number){
+        try {
+            const materias = await this.prismaService.materia_tutor.deleteMany({
+                where:{
+                    idMateria,
+                    idUsuario: idTutor
+                }
+            });
+    
+            return {message: "Materia eliminada con exito"}
+            
+        } catch (error) {
+            throw new BadRequestException(`Error al eliminar la materia`);
+        }
+    }
 }

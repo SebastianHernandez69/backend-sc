@@ -408,8 +408,8 @@ export class UserService {
                     idUsuario,
                     idPuesto: Number(idPuesto),
                     empresa,
-                    fechaInicio,
-                    fechaFin,
+                    fechaInicio: new Date(fechaInicio),
+                    fechaFin: new Date(fechaFin),
                     descripcion
                 }
             });
@@ -453,7 +453,7 @@ export class UserService {
                     idUsuario,
                     idInstitucion: Number(idInstitucion),
                     tituloAcademico,
-                    fechaEgreso
+                    fechaEgreso: new Date(fechaEgreso)
                 }
             });
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { MateriaService } from './materia.service';
 import { CategoriaDto } from './dto/categoria-dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -31,5 +31,13 @@ export class MateriaController {
     const user = req.user as JwtPayload;
 
     return this.materiaService.getMateriaInteresTutor(user.sub);
+  }
+
+  @Delete('/interes-tutor/delete')
+  @UseGuards(JwtAuthGuard)
+  async removeMateriaInteresTutor(@Body('idMateria') idMateria: number, @Req() req: Request){
+    const user = req.user as JwtPayload;
+    
+    return await this.materiaService.removeMateriaInteresTutor(user.sub, idMateria);
   }
 }

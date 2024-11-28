@@ -22,7 +22,7 @@ export class OfferNotificationGateway {
     }
 
     client.join(roomName);
-    console.log(`El pupilo con ID ${idPupilo} se unió a la sala`);
+    // console.log(`El pupilo con ID ${idPupilo} se unió a la sala`);
   }
 
   // enviar notificacion de nueva oferta a la room del pupilo
@@ -41,7 +41,7 @@ export class OfferNotificationGateway {
     }
 
     client.join(roomName);
-    console.log(`Usuario se a unido a la room ${roomName}`);
+    // console.log(`Usuario se a unido a la room ${roomName}`);
   }
 
   // notificar a los user que se acepto una pregunta
@@ -49,7 +49,7 @@ export class OfferNotificationGateway {
     const roomName = 'offerQuestions';
 
     const clientsInRoom = this.server.sockets.adapter.rooms.get(roomName);
-    console.log(`Clientes en la sala ${roomName}:`, clientsInRoom);
+    // console.log(`Clientes en la sala ${roomName}:`, clientsInRoom);
 
     this.server.to(roomName).emit('questionStateUpdate', {idPregunta, idOferta});
     console.log(`Oferta: ${idOferta} aceptada de la pregunta: ${idPregunta}`);
