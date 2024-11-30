@@ -23,12 +23,13 @@ model categoria {
 }
 
 model comentario {
-  idComentario                                          Int     @id @default(autoincrement())
+  idComentario                                          Int       @id @default(autoincrement())
   idUsuarioComenta                                      Int
   idUsuarioRecibeComentario                             Int
   comentario                                            String
-  usuario_comentario_idUsuarioComentaTousuario          usuario @relation("comentario_idUsuarioComentaTousuario", fields: [idUsuarioComenta], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "comentario_idusuariocomenta_foreign")
-  usuario_comentario_idUsuarioRecibeComentarioTousuario usuario @relation("comentario_idUsuarioRecibeComentarioTousuario", fields: [idUsuarioRecibeComentario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "comentario_idusuariorecibecomentario_foreign")
+  fechaComentario                                       DateTime? @db.Date
+  usuario_comentario_idUsuarioComentaTousuario          usuario   @relation("comentario_idUsuarioComentaTousuario", fields: [idUsuarioComenta], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "comentario_idusuariocomenta_foreign")
+  usuario_comentario_idUsuarioRecibeComentarioTousuario usuario   @relation("comentario_idUsuarioRecibeComentarioTousuario", fields: [idUsuarioRecibeComentario], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "comentario_idusuariorecibecomentario_foreign")
 }
 
 model conocimiento {
@@ -130,18 +131,19 @@ model ofertaresolucion {
 }
 
 model pregunta {
-  idPregunta       Int                @id @default(autoincrement())
-  idMateria        Int
-  idUsuarioPupilo  Int
-  titulo           String             @db.VarChar(150)
-  descripcion      String
-  idEstadoPregunta Int
-  fechaPublicacion DateTime?          @db.Timestamptz(6)
-  imgpregunta      imgpregunta[]
-  ofertaresolucion ofertaresolucion[]
-  estadoPregunta   estadoPregunta     @relation(fields: [idEstadoPregunta], references: [idEstadoPregunta], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idestadopregunta_foreign")
-  materia          materia            @relation(fields: [idMateria], references: [idMateria], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idmateria_foreign")
-  usuario          usuario            @relation(fields: [idUsuarioPupilo], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idusuariopupilo_foreign")
+  idPregunta          Int                   @id @default(autoincrement())
+  idMateria           Int
+  idUsuarioPupilo     Int
+  titulo              String                @db.VarChar(150)
+  descripcion         String
+  idEstadoPregunta    Int
+  fechaPublicacion    DateTime?             @db.Timestamptz(6)
+  imgpregunta         imgpregunta[]
+  ofertaresolucion    ofertaresolucion[]
+  estadoPregunta      estadoPregunta        @relation(fields: [idEstadoPregunta], references: [idEstadoPregunta], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idestadopregunta_foreign")
+  materia             materia               @relation(fields: [idMateria], references: [idMateria], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idmateria_foreign")
+  usuario             usuario               @relation(fields: [idUsuarioPupilo], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "pregunta_idusuariopupilo_foreign")
+  pregunta_contestada pregunta_contestada[]
 }
 
 model puesto {
@@ -157,30 +159,52 @@ model rol {
 }
 
 model usuario {
-  idUsuario                                                Int                @id @default(autoincrement())
+  idUsuario                                                Int                   @id @default(autoincrement())
   idRol                                                    Int
   idNombre                                                 Int
   edad                                                     Int
-  correo                                                   String             @unique @db.VarChar(150)
-  contrasenia                                              String             @db.VarChar(255)
-  dni                                                      String             @db.VarChar(60)
-  telefono                                                 String             @db.VarChar(50)
+  correo                                                   String                @unique @db.VarChar(150)
+  contrasenia                                              String                @db.VarChar(255)
+  dni                                                      String                @db.VarChar(60)
+  telefono                                                 String                @db.VarChar(50)
   valoracion                                               Float
-  fotoPerfil                                               String?            @db.VarChar(255)
-  horarioDisponibleInicio                                  DateTime           @db.Time(6)
-  horarioDisponibleFin                                     DateTime           @db.Time(6)
+  fotoPerfil                                               String?               @db.VarChar(255)
+  horarioDisponibleInicio                                  DateTime              @db.Time(6)
+  horarioDisponibleFin                                     DateTime              @db.Time(6)
   isverified                                               Boolean
-  verificationcode                                         String?            @db.VarChar(30)
-  verificationexpiry                                       DateTime?          @db.Timestamptz(6)
+  verificationcode                                         String?               @db.VarChar(30)
+  verificationexpiry                                       DateTime?             @db.Timestamptz(6)
   isenabled                                                Boolean?
-  comentario_comentario_idUsuarioComentaTousuario          comentario[]       @relation("comentario_idUsuarioComentaTousuario")
-  comentario_comentario_idUsuarioRecibeComentarioTousuario comentario[]       @relation("comentario_idUsuarioRecibeComentarioTousuario")
+  comentario_comentario_idUsuarioComentaTousuario          comentario[]          @relation("comentario_idUsuarioComentaTousuario")
+  comentario_comentario_idUsuarioRecibeComentarioTousuario comentario[]          @relation("comentario_idUsuarioRecibeComentarioTousuario")
   conocimiento                                             conocimiento[]
   experiencia                                              experiencia[]
   interes_pupilo                                           interes_pupilo[]
   materia_tutor                                            materia_tutor[]
   ofertaresolucion                                         ofertaresolucion[]
   pregunta                                                 pregunta[]
-  nombre                                                   nombre             @relation(fields: [idNombre], references: [idNombre], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idnombre_foreign")
-  rol                                                      rol                @relation(fields: [idRol], references: [idRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idrol_foreign")
+  pregunta_contestada                                      pregunta_contestada[]
+  nombre                                                   nombre                @relation(fields: [idNombre], references: [idNombre], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idnombre_foreign")
+  rol                                                      rol                   @relation(fields: [idRol], references: [idRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idrol_foreign")
+  valoracion_valoracion_idUsuarioDaTousuario               valoracion[]          @relation("valoracion_idUsuarioDaTousuario")
+  valoracion_valoracion_idUsuarioRecibeTousuario           valoracion[]          @relation("valoracion_idUsuarioRecibeTousuario")
+}
+
+model pregunta_contestada {
+  idPreguntaContestada Int      @id @default(autoincrement())
+  idPregunta           Int
+  idTutor              Int
+  fechaContestada      DateTime @db.Date
+  pregunta             pregunta @relation(fields: [idPregunta], references: [idPregunta], onDelete: NoAction, onUpdate: NoAction, map: "constestada_idPregunta_foreign")
+  usuario              usuario  @relation(fields: [idTutor], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "constestada_idUsuario_foreign")
+}
+
+model valoracion {
+  idValoracion                                Int      @id @default(autoincrement())
+  idUsuarioRecibe                             Int
+  idUsuarioDa                                 Int
+  valoracion                                  Int
+  fechaValoracion                             DateTime @db.Date
+  usuario_valoracion_idUsuarioDaTousuario     usuario  @relation("valoracion_idUsuarioDaTousuario", fields: [idUsuarioDa], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "valoracion_idUsuarioDa_foreign")
+  usuario_valoracion_idUsuarioRecibeTousuario usuario  @relation("valoracion_idUsuarioRecibeTousuario", fields: [idUsuarioRecibe], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "valoracion_idUsuarioRecibe_foreign")
 }

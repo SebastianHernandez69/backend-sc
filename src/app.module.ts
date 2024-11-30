@@ -11,15 +11,16 @@ import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
 import { StreamchatModule } from './streamchat/streamchat.module';
 import { OfferNotificationGateway } from './offer-notification/offer-notification.gateway';
-import { AcceptedQuestionGateway } from './accepted-question/accepted-question.gateway';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ExperienceModule } from './experience/experience.module';
 import { QuestionModule } from './question/question.module';
+import { AnswerQuestionGateway } from './accepted-question/answer-question.gateway';
+import { ValoracionModule } from './valoracion/valoracion.module';
 
 @Module({
   imports: [AuthModule, PrismaModule, HomeModule, CategoriesModule, MateriaModule, UserModule, 
-    S3Module, ConfigModule.forRoot({isGlobal: true}), AdminModule, StreamchatModule, CloudinaryModule, ExperienceModule, QuestionModule],
+    S3Module, ConfigModule.forRoot({isGlobal: true}), AdminModule, StreamchatModule, CloudinaryModule, ExperienceModule, QuestionModule, ValoracionModule],
   controllers: [],
-  providers: [EmailService, OfferNotificationGateway, AcceptedQuestionGateway],
+  providers: [EmailService, OfferNotificationGateway, AnswerQuestionGateway],
 })
 export class AppModule {}

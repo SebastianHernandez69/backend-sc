@@ -11,6 +11,7 @@ import { ConocimientoDto } from './dto/conocimiento.dto';
 import { OfferNotificationGateway } from 'src/offer-notification/offer-notification.gateway';
 import { StreamchatService } from 'src/streamchat/streamchat.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { AnswerQuestionGateway } from 'src/accepted-question/answer-question.gateway';
 
 @Injectable()
 export class UserService {
@@ -20,7 +21,8 @@ export class UserService {
         private readonly s3Service: S3Service, 
         private ofertaNotiGateway: OfferNotificationGateway,
         private streamchatService: StreamchatService,
-        private cloudinaryService: CloudinaryService
+        private cloudinaryService: CloudinaryService,
+        private answerQuestionGateway: AnswerQuestionGateway
     ){
     }
 
@@ -159,6 +161,7 @@ export class UserService {
             const user = await this.prismaService.usuario.findUnique({
                 where: {idUsuario},
                 select: {
+                    idUsuario:true,
                     nombre: true,
                     edad: true,
                     correo: true,
@@ -175,7 +178,8 @@ export class UserService {
                         select: {
                             materia:true
                         }
-                    }
+                    },
+                    
                 }
             });
     
@@ -366,7 +370,8 @@ export class UserService {
             });
             
             this.ofertaNotiGateway.sendStateChangeQuestion(updatedOfferState.idPregunta, updatedOfferState.idOferta);
-
+            this.answerQuestionGateway.NotifyJoinRoom(updatedOfferState.idPregunta, updatedOfferState.idUsuarioTutor, updatedQuestionState.idUsuarioPupilo);
+            
             return updatedQuestionState;
         } catch (error) {
             throw new BadRequestException(`Error al actualizar el estado de la pregunta: ${error}`);

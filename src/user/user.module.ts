@@ -6,10 +6,11 @@ import { S3Module } from 'src/s3/s3.module';
 import { OfferNotificationGateway } from 'src/offer-notification/offer-notification.gateway';
 import { StreamchatModule } from 'src/streamchat/streamchat.module';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { AnswerQuestionGateway } from 'src/accepted-question/answer-question.gateway';
 
 @Module({
   controllers: [UserController],
-  providers: [UserService,OfferNotificationGateway],
+  providers: [UserService,OfferNotificationGateway, AnswerQuestionGateway],
   imports: [PrismaModule, S3Module, StreamchatModule, CloudinaryModule]
 })
 export class UserModule {}
