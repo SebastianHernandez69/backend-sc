@@ -22,7 +22,7 @@ export class ValoracionService {
                 }
             });
 
-            const promValoracion = resultValoracion._avg.valoracion;
+            const promValoracion = resultValoracion._avg.valoracion || 5.00;
             const numValoracion = resultValoracion._count.valoracion;
 
             return {
@@ -115,6 +115,9 @@ export class ValoracionService {
                     },
                     comentario: true,
                     fechaComentario: true
+                },
+                orderBy:{
+                    fechaComentario: "desc"
                 }
             });
 
