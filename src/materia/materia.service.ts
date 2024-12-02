@@ -76,13 +76,19 @@ export class MateriaService {
                 select:{
                     materia: {
                         select: {
+                            idMateria: true,
                             materia: true
                         }
                     }
                 }
             });
 
-            return {materias: materias.map(materia => materia.materia.materia)};
+            const materiaFormat = materias.map((m) => ({
+                idMateria: m.materia.idMateria,
+                materia: m.materia.materia
+            }))
+
+            return materiaFormat;
         } catch (error) {
             throw new BadRequestException(`Error al obtener las materias del tutor: ${error}`);
         }

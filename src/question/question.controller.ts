@@ -38,4 +38,12 @@ export class QuestionController {
   async updateQuestion(@Param("idPregunta") idPregunta: number, @Body() updateQuestionDto?: UpdateQuestionDto, @UploadedFiles() files?: Express.Multer.File[]){
     return await this.questionService.updateQuestion(Number(idPregunta),updateQuestionDto, files || [])
   }
+
+  @Get('/answer-question/get')
+  @UseGuards(JwtAuthGuard)
+  async getAnsQuestionsByRole(@Req() req: Request){
+    const user = req.user as JwtPayload;
+
+    return await this.questionService.getAnsQuestionsByRole(user.sub, user.rol);
+  }
 }

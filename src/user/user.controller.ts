@@ -138,4 +138,11 @@ export class UserController {
     return await this.userService.addConocimiento(conocimientoDto, user.sub);
   }
 
+  @Patch('/answere-question')
+  @UseGuards(JwtAuthGuard)
+  async markQuestionAnswered(@Body('idPregunta') idPregunta: number, @Req() req: Request){
+    const user = req.user as JwtPayload;
+    return await this.userService.markQuestionAnswered(idPregunta, user.sub)
+  }
+
 }

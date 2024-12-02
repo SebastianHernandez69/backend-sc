@@ -61,13 +61,19 @@ export class UserService {
                     select: {
                         materia:{
                             select: {
+                                idMateria: true,
                                 materia: true
                             }
                         }
                     }
                 });
 
-                return {materia: interesTutor.materia.materia};
+                const materiaFormat = {
+                    idMateria: interesTutor.materia.idMateria,
+                    materia: interesTutor.materia.materia
+                }
+
+                return materiaFormat;
             }
 
         }catch(error){
@@ -487,6 +493,39 @@ export class UserService {
             return conocimientos;
         } catch (error) {
             throw new BadRequestException(`Error al obtener conocimientos del usuario: ${error}`);
+        }
+    }
+
+    //
+    async markQuestionAnswered(idPregunta: number, idTutor: number){
+        try {
+            const updateQuestionState = await this.prismaService.pregunta.update({
+                where: {
+                    idPregunta
+                },
+                data: {
+                    idEstadoPregunta: 3
+                }
+            });
+
+            if(!updateQuestionState) {
+                throw new BadRequestException("Error al marcar pregunta como contestada")
+            }
+            const answQuestion = await this.prismaService.pregunta_contestada.create({
+                data:{
+                    idPregunta: updateQuestionState.idPregunta,
+                    idTutor: idTutor,
+                    idPupilo: updateQuestionState.idUsuarioPupilo,
+                    fechaContestada: new Date()
+                }
+            });
+
+            this.answerQuestionGateway.notifyQuestionAnswered(answQuestion.idPregunta, answQuestion.idTutor);
+            this.ofertaNotiGateway.sendAnsQuestionNotification(updateQuestionState.idUsuarioPupilo, updateQuestionState.idPregunta);
+            
+            return answQuestion.idPreguntaContestada;
+        } catch (error) {
+            throw new BadRequestException(`Error al cambiar estado a contestado de la pregunta: ${error}`);
         }
     }
 }

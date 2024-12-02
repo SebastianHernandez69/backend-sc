@@ -159,44 +159,47 @@ model rol {
 }
 
 model usuario {
-  idUsuario                                                Int                   @id @default(autoincrement())
-  idRol                                                    Int
-  idNombre                                                 Int
-  edad                                                     Int
-  correo                                                   String                @unique @db.VarChar(150)
-  contrasenia                                              String                @db.VarChar(255)
-  dni                                                      String                @db.VarChar(60)
-  telefono                                                 String                @db.VarChar(50)
-  valoracion                                               Float
-  fotoPerfil                                               String?               @db.VarChar(255)
-  horarioDisponibleInicio                                  DateTime              @db.Time(6)
-  horarioDisponibleFin                                     DateTime              @db.Time(6)
-  isverified                                               Boolean
-  verificationcode                                         String?               @db.VarChar(30)
-  verificationexpiry                                       DateTime?             @db.Timestamptz(6)
-  isenabled                                                Boolean?
-  comentario_comentario_idUsuarioComentaTousuario          comentario[]          @relation("comentario_idUsuarioComentaTousuario")
-  comentario_comentario_idUsuarioRecibeComentarioTousuario comentario[]          @relation("comentario_idUsuarioRecibeComentarioTousuario")
-  conocimiento                                             conocimiento[]
-  experiencia                                              experiencia[]
-  interes_pupilo                                           interes_pupilo[]
-  materia_tutor                                            materia_tutor[]
-  ofertaresolucion                                         ofertaresolucion[]
-  pregunta                                                 pregunta[]
-  pregunta_contestada                                      pregunta_contestada[]
-  nombre                                                   nombre                @relation(fields: [idNombre], references: [idNombre], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idnombre_foreign")
-  rol                                                      rol                   @relation(fields: [idRol], references: [idRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idrol_foreign")
-  valoracion_valoracion_idUsuarioDaTousuario               valoracion[]          @relation("valoracion_idUsuarioDaTousuario")
-  valoracion_valoracion_idUsuarioRecibeTousuario           valoracion[]          @relation("valoracion_idUsuarioRecibeTousuario")
+  idUsuario                                                 Int                   @id @default(autoincrement())
+  idRol                                                     Int
+  idNombre                                                  Int
+  edad                                                      Int
+  correo                                                    String                @unique @db.VarChar(150)
+  contrasenia                                               String                @db.VarChar(255)
+  dni                                                       String                @db.VarChar(60)
+  telefono                                                  String                @db.VarChar(50)
+  valoracion                                                Float
+  fotoPerfil                                                String?               @db.VarChar(255)
+  horarioDisponibleInicio                                   DateTime              @db.Time(6)
+  horarioDisponibleFin                                      DateTime              @db.Time(6)
+  isverified                                                Boolean
+  verificationcode                                          String?               @db.VarChar(30)
+  verificationexpiry                                        DateTime?             @db.Timestamptz(6)
+  isenabled                                                 Boolean?
+  comentario_comentario_idUsuarioComentaTousuario           comentario[]          @relation("comentario_idUsuarioComentaTousuario")
+  comentario_comentario_idUsuarioRecibeComentarioTousuario  comentario[]          @relation("comentario_idUsuarioRecibeComentarioTousuario")
+  conocimiento                                              conocimiento[]
+  experiencia                                               experiencia[]
+  interes_pupilo                                            interes_pupilo[]
+  materia_tutor                                             materia_tutor[]
+  ofertaresolucion                                          ofertaresolucion[]
+  pregunta                                                  pregunta[]
+  pregunta_contestada_pregunta_contestada_idPupiloTousuario pregunta_contestada[] @relation("pregunta_contestada_idPupiloTousuario")
+  pregunta_contestada                                       pregunta_contestada[]
+  nombre                                                    nombre                @relation(fields: [idNombre], references: [idNombre], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idnombre_foreign")
+  rol                                                       rol                   @relation(fields: [idRol], references: [idRol], onDelete: NoAction, onUpdate: NoAction, map: "usuario_idrol_foreign")
+  valoracion_valoracion_idUsuarioDaTousuario                valoracion[]          @relation("valoracion_idUsuarioDaTousuario")
+  valoracion_valoracion_idUsuarioRecibeTousuario            valoracion[]          @relation("valoracion_idUsuarioRecibeTousuario")
 }
 
 model pregunta_contestada {
-  idPreguntaContestada Int      @id @default(autoincrement())
-  idPregunta           Int
-  idTutor              Int
-  fechaContestada      DateTime @db.Date
-  pregunta             pregunta @relation(fields: [idPregunta], references: [idPregunta], onDelete: NoAction, onUpdate: NoAction, map: "constestada_idPregunta_foreign")
-  usuario              usuario  @relation(fields: [idTutor], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "constestada_idUsuario_foreign")
+  idPreguntaContestada                          Int      @id @default(autoincrement())
+  idPregunta                                    Int
+  idPupilo                                      Int
+  idTutor                                       Int
+  fechaContestada                               DateTime @db.Date
+  pregunta                                      pregunta @relation(fields: [idPregunta], references: [idPregunta], onDelete: NoAction, onUpdate: NoAction, map: "constestada_idPregunta_foreign")
+  usuario_pregunta_contestada_idPupiloTousuario usuario  @relation("pregunta_contestada_idPupiloTousuario", fields: [idPupilo], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "constestada_idUsuarioPupilo_foreign")
+  usuario                                       usuario  @relation(fields: [idTutor], references: [idUsuario], onDelete: NoAction, onUpdate: NoAction, map: "constestada_idUsuario_foreign")
 }
 
 model valoracion {

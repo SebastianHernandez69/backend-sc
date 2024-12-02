@@ -74,4 +74,10 @@ export class OfferNotificationGateway {
     this.server.to(roomName).emit('newQuestionNotification', {idPregunta});
     console.log(`Nueva pregunta con id: ${idPregunta} creada`);
   }
+
+  sendAnsQuestionNotification(idPupilo:number, idPregunta: number){
+    const pupilRoom = String(idPupilo);
+
+    this.server.to(pupilRoom).emit(`AnsQuestionNotification`, {idPregunta});
+  }
 }

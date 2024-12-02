@@ -3,12 +3,13 @@ import { AnswerQuestionGateway } from 'src/accepted-question/answer-question.gat
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { ansQuestionSelect } from './dto/ansPregunta-select';
 
 @Injectable()
 export class QuestionService {
     constructor(private readonly prismaService: PrismaService, 
         private answerQuestionGateway: AnswerQuestionGateway,
-        private cloudinaryService: CloudinaryService
+        private cloudinaryService: CloudinaryService,
     ){}
 
     // delete question
@@ -65,33 +66,58 @@ export class QuestionService {
                 data:{
                     idPregunta: updateQuestionState.idPregunta,
                     idTutor: idTutor,
+                    idPupilo: updateQuestionState.idUsuarioPupilo,
                     fechaContestada: new Date()
                 }
             });
 
             this.answerQuestionGateway.notifyQuestionAnswered(answQuestion.idPregunta, answQuestion.idTutor);
+            
             return answQuestion.idPreguntaContestada;
         } catch (error) {
             throw new BadRequestException(`Error al cambiar estado a contestado de la pregunta: ${error}`);
         }
     }
 
-    // get all answered question by idUsuario
-    // async getAnsweredQuestions(idUsuario: number){
-    //     try {
-    //         const answQuestion = await this.prismaService.pregunta.findMany({
-    //             where: {
-    //                 idUsuarioPupilo: idUsuario
-    //             },
-    //             select: {
-
-    //             }
-    //         })
-    //     } catch (error) {
-            
-    //     }
-    // }
-
+    async getAnsQuestionsByRole(idUsuario: number, idRol: number) {
+        const where = idRol === 1 
+            ? { idTutor: idUsuario } 
+            : { idPupilo: idUsuario }; // Cambiar la condición según tu lógica
+    
+        const userSelectField = idRol === 1 
+            ? 'usuario_pregunta_contestada_idPupiloTousuario'
+            : 'usuario';
+    
+        try {
+            const ansQuestions = await this.prismaService.pregunta_contestada.findMany({
+                where,
+                select: {
+                    ...ansQuestionSelect,
+                    [userSelectField]: {
+                        select: {
+                            nombre: true,
+                        },
+                    },
+                },
+            });
+    
+            return ansQuestions.map((q) => ({
+                titulo: q.pregunta.titulo,
+                descripcion: q.pregunta.descripcion,
+                materia: q.pregunta.materia.materia,
+                nombre: {
+                    primerNombre: q[userSelectField].nombre.primerNombre,
+                    segundoNombre: q[userSelectField].nombre.segundoNombre,
+                    primerApellido: q[userSelectField].nombre.primerApellido,
+                    segundoApellido: q[userSelectField].nombre.segundoApellido,
+                },
+                fechaContestada: q.fechaContestada,
+            }));
+        } catch (error) {
+            throw new BadRequestException(`Error al obtener las preguntas contestadas`);
+        }
+    }
+    
     // Get question by id
     async getQuestionById(idPregunta: number){
         try {
