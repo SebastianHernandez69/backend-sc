@@ -178,8 +178,16 @@ export class UserService {
                     horarioDisponibleInicio: true,
                     horarioDisponibleFin:true,
                     rol: true,
-                    experiencia: true,
-                    conocimiento: true,
+                    experiencia: {
+                        include: {
+                            puesto: true
+                        }
+                    },
+                    conocimiento: {
+                        include: {
+                            institucion: true
+                        }
+                    },
                     materia_tutor: {
                         select: {
                             materia:true
@@ -440,7 +448,7 @@ export class UserService {
                 fechaFin: newExperiencia.fechaFin,
                 descripcion: newExperiencia.descripcion
             }
-            
+
             return experieciaFormat;
         } catch (error) {
             throw new BadRequestException(`Error al crear una experiencia: ${error}`);
