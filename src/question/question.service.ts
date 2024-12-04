@@ -99,6 +99,9 @@ export class QuestionService {
                         },
                     },
                 },
+                orderBy: {
+                    fechaContestada: "desc"
+                }
             });
     
             return ansQuestions.map((q) => ({
@@ -147,6 +150,28 @@ export class QuestionService {
     // delete question img
     async deleteQuestionImg(idImg: number){
         try {
+
+            const questionStateImg = await this.prismaService.imgpregunta.findUnique({
+                where: {
+                    idImg
+                },
+                select: {
+                    pregunta: {
+                        select: {
+                            idEstadoPregunta: true
+                        }
+                    }
+                }
+            });
+
+            if(!questionStateImg){
+                throw new NotFoundException("Imagen no encontrada");
+            }
+
+            if(questionStateImg.pregunta.idEstadoPregunta !== 1){
+                throw new ConflictException(`No se puede eliminar - pregunta ya aceptada o contestada`);
+            }
+
             const deletedImg = await this.prismaService.imgpregunta.delete({
                 where: {
                     idImg
@@ -159,6 +184,12 @@ export class QuestionService {
 
             return deletedImg;
         } catch (error) {
+            if(error instanceof ConflictException){
+                throw error;
+            }
+            if(error instanceof NotFoundException){
+                throw error;
+            }
             throw new BadRequestException(`Error al eliminar imagen: ${error}`);
         }
     }

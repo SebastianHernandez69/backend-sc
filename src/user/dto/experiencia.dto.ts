@@ -1,7 +1,7 @@
 export class ExperienciaDto{
     idPuesto: string;
     empresa: string;
-    fechaInicio: Date;
-    fechaFin: Date;
+    fechaInicio: string;
+    fechaFin: string;
     descripcion: string;
 }

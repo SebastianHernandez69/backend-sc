@@ -422,6 +422,9 @@ export class UserService {
                     fechaInicio: new Date(fechaInicio),
                     fechaFin: new Date(fechaFin),
                     descripcion
+                },
+                include: {
+                    puesto: true
                 }
             });
 
@@ -429,7 +432,16 @@ export class UserService {
                 throw new BadRequestException("Error al crear experiencia");
             }
 
-            return newExperiencia;
+            const experieciaFormat = {
+                idExperiencia: newExperiencia.idExperiencia,
+                puesto: newExperiencia.puesto.puesto,
+                empresa: newExperiencia.empresa,
+                fechaInicio: newExperiencia.fechaInicio,
+                fechaFin: newExperiencia.fechaFin,
+                descripcion: newExperiencia.descripcion
+            }
+            
+            return experieciaFormat;
         } catch (error) {
             throw new BadRequestException(`Error al crear una experiencia: ${error}`);
         }
@@ -465,6 +477,9 @@ export class UserService {
                     idInstitucion: Number(idInstitucion),
                     tituloAcademico,
                     fechaEgreso: new Date(fechaEgreso)
+                },
+                include: {
+                    institucion: true
                 }
             });
 
@@ -472,7 +487,14 @@ export class UserService {
                 throw new BadRequestException("Error al crear un nuevo conocimiento");
             }
 
-            return newConocimiento;
+            const conocimientoFormat = {
+                idConocimiento: newConocimiento.idConocimiento,
+                institucion: newConocimiento.institucion.institucion,
+                tituloAcademico: newConocimiento.tituloAcademico,
+                fechaEgreso: newConocimiento.fechaEgreso
+            }
+
+            return conocimientoFormat;
         } catch (error) {
             throw new BadRequestException(`Error al crear conocimiento: ${error}`);
         }

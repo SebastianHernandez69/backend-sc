@@ -69,4 +69,72 @@ export class ExperienceService {
             throw new BadRequestException(`Error al crear el puesto: ${error}`);
         }
     }
+
+    // get experience 
+    async getExperienciaIdUsuario(idUsuario: number){
+        try {
+            const experience = await this.prismaService.experiencia.findMany({
+                where: {
+                    idUsuario
+                },
+                include: {
+                    puesto: {
+                        select: {
+                            puesto: true
+                        }
+                    }
+                }
+            });
+
+            if(!experience){
+                return experience;
+            }
+
+            const experienceFormat = experience.map((e) => ({
+                idExperiencia: e.idExperiencia,
+                puesto: e.puesto.puesto,
+                empresa: e.empresa,
+                fechaInicio: e.fechaInicio,
+                fechaFin: e.fechaFin,
+                descripcion: e.descripcion
+            }));
+
+            return experienceFormat;
+        } catch (error) {
+            throw new BadRequestException(`Error al obtener la experiencia del usuario: ${error}`);
+        }
+    }
+
+    // get conocimiento by userId
+    async getConocimientoIdUsuario(idUsuario: number){
+        try {
+            const conocimientos = await this.prismaService.conocimiento.findMany({
+                where: {
+                    idUsuario
+                },
+                include: {
+                    institucion: {
+                        select: {
+                            institucion: true
+                        }
+                    }
+                }
+            });
+
+            if(!conocimientos){
+                return conocimientos;
+            }
+
+            const conocimientoFormat = conocimientos.map((c) => ({
+                idConocimiento: c.idConocimiento,
+                institucion: c.institucion.institucion,
+                tituloAcademico: c.tituloAcademico,
+                fechaEgreso: c.fechaEgreso
+            }));
+
+            return conocimientoFormat;
+        } catch (error) {
+            throw new BadRequestException(`Error al obtener los conocimientos del usuario: ${error}`);
+        }
+    }
 }
