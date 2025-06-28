@@ -1,3 +1,7 @@
+**SharkCat Frontend:** https://github.com/SebastianHernandez69/frontend-sc
+
+
+
 <<<<<<< HEAD
 # backend-sc
 =======
